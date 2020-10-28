@@ -5,6 +5,8 @@ Turma: 5
 Iohan Xavier Sardinha Dutra Soares (up201801011)
 João Diogo Vila Franca Gonçalves (up201806162)
 
+---
+
 ### Descrição do Jogo
 
 Cada jogador possui duas carpas e dez pedras. Um par de carpas vermelho outro amarelo.
@@ -20,16 +22,37 @@ Em cada jogada podem se mover de duas formas:
 Ao final de cada jogada o jogador que se moveu ganha pontos de acordo com a quantidade de carpas adjecentes a carpa que se acabou de se mover, independente da cor do outro peixe.
 O jogo acaba assim que um jogador acumular dez pontos.
 
+---
+
 ### Representação interna do Estado do Jogo
 
+O estado do jogo é representado por:
+
+- Tabuleiro
+  Constituido de uma lista de listas, com o estado de cada casa do tabuleiro, podendo ser:
+
+  - _empty_ - Casa vazia
+  - _red_ - Carpa vermelha
+  - _yellow_ - Carpa amarela
+  - _stone_ - Pedra
+
+- Pontuação
+  Valor da pontuação de cada jogador, inicialmente zero para os dois e será incrementado a cada rodada que o jogador pontuar.
+- Quantidade de Pedras de cada jogador
+  Quantidade de pedras é inicialmente dez e é decrementada toda vez que um jogador coloca uma pedra no tabuleiro
+- Jogador da vez
+  Representado por um 0 ou 1 equivalendo a cada jogador, 0 - vermelho e 1 - amarelo. Jogador da vez alterna entre os dois valores de rodada em rodada
+
+Demostração dos estados do jogo, inicial, meio e final, respectivamente:
 ![Initial Games State](/initial.png)
 ![Middle Games State](/middle.png)
 ![Final Games State](/final.png)
 
-> Legenda:
-> R - Carpa Vermelha
-> Y - Carpa Amarela
-> O - Pedra
+> R - Carpa Vermelha;  
+> Y - Carpa Amarela;  
+> O - Pedra;
+
+---
 
 ### Visualização Do Estado do Jogo
 
