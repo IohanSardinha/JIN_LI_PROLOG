@@ -59,7 +59,6 @@ turn(1,'Yellow').
 %displayGame(+GameState,+Player)
 %Display the given state of the game and the current turn player
 displayGame(GameState,Player) :-
-    nl,
     turn(Player, P),
     format("Turn: ~w~n",P),
     write('   | 1 | 2 | 3 | 4 | 5 | 6 | 7 |\n'),

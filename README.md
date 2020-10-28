@@ -22,4 +22,17 @@ O jogo acaba assim que um jogador acumular dez pontos.
 
 ### Representação interna do Estado do Jogo
 
+[Initial Games State](/initial.png)
+[Middle Games State](/middle.png)
+[Final Games State](/final.png)
+
+> Legenda:
+> R - Carpa Vermelha
+> Y - Carpa Amarela
+> O - Pedra
+
 ### Visualização Do Estado do Jogo
+
+A vizulização do tabuleiro começa por mostrar um cabeçalho, com a cor do jogador atual e o numero das casas como referencia.
+Então é chamado o predicato recursivo _printLines_ que recebe o tabuleiro e a linha a ser desenhada, vai unificar através do predicato _letter_ a letra equivalente a cada linha, para apresentar como referencia, chamará _printObjects_ e então chamará _printLines_ com a linha a ser apresentada incrementada em um.
+Já _printObjects_ irá percorrer os elementos da linha e fazer a unificação entre cada objeto de representação interna de estado e o caracter que será apresentado na tela para represená-lo, através do predicato _symbol_.
