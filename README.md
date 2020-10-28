@@ -22,9 +22,9 @@ O jogo acaba assim que um jogador acumular dez pontos.
 
 ### Representação interna do Estado do Jogo
 
-[Initial Games State](/initial.png)
-[Middle Games State](/middle.png)
-[Final Games State](/final.png)
+![Initial Games State](/initial.png)
+![Middle Games State](/middle.png)
+![Final Games State](/final.png)
 
 > Legenda:
 > R - Carpa Vermelha
