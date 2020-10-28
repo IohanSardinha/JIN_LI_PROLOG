@@ -44,6 +44,7 @@ O estado do jogo é representado por:
   Representado por um 0 ou 1 equivalendo a cada jogador, 0 - vermelho e 1 - amarelo. Jogador da vez alterna entre os dois valores de rodada em rodada
 
 Demostração dos estados do jogo, inicial, meio e final, respectivamente:
+
 ![Initial Games State](/initial.png)
 ![Middle Games State](/middle.png)
 ![Final Games State](/final.png)
