@@ -1,3 +1,4 @@
+:- consult('utils.pl').
 %initial(-Board)
 %Initial board state
 initial([
@@ -89,4 +90,4 @@ printObjects([Head|Tail]) :-
 
 %play()
 %Shows the initial state of the game
-play(_) :- initial(Board),turn(FirstPlayer,'Yellow'), displayGame(Board,FirstPlayer).
+play:- initial(Board),middleBoard(Board2),turn(FirstPlayer,'Yellow'), displayGame(Board,FirstPlayer),replaceInMatrix(Board,5,1,yellow,NewBoard),replaceInMatrix(NewBoard,6,0,empty,NewNewBoard),displayGame(NewNewBoard,FirstPlayer).
