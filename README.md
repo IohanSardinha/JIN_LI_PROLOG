@@ -46,9 +46,9 @@ O estado do jogo é representado por:
   - _stone_ - Pedra
 
 - Pontuação
-  Valor da pontuação de cada jogador, inicialmente zero para os dois e será incrementado a cada rodada que o jogador pontuar.
+  Valor da pontuação de cada jogador, inicialmente zero para os dois e será incrementado a cada rodada que o jogador pontuar. Através de predicados dinâmicos.
 - Quantidade de Pedras de cada jogador
-  Quantidade de pedras é inicialmente dez e é decrementada toda vez que um jogador coloca uma pedra no tabuleiro
+  Quantidade de pedras é inicialmente dez e é decrementada toda vez que um jogador coloca uma pedra no tabuleiro, através de predicados dinâmicos.
 - Jogador da vez
   Representado por um 0 ou 1 equivalendo a cada jogador, 0 - vermelho e 1 - amarelo. Jogador da vez alterna entre os dois valores de rodada em rodada
 
