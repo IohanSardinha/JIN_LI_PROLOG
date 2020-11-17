@@ -1,4 +1,7 @@
+:- use_module(library(random)).
+:- use_module(library(lists)).
 :- consult('utils.pl').
+:- consult('display.pl').
 %initial(-Board)
 %Initial board state
 initial([
@@ -35,28 +38,6 @@ finalBoard([
 [empty,stone,empty,empty,stone,stone,empty]
 ]).
 
-%symbol(+state,-symbol).
-%Symbol to be printed from each board cell state
-symbol(empty,S) :- S=' '.
-symbol(yellow,S) :- S='Y'.
-symbol(stone,S) :- S='O'.
-symbol(red,S) :- S='R'.
-
-%letter(+Number, -Letter).
-%Letter to be printed for each board row
-letter(1, L) :- L='A'.
-letter(2, L) :- L='B'.
-letter(3, L) :- L='C'.
-letter(4, L) :- L='D'.
-letter(5, L) :- L='E'.
-letter(6, L) :- L='F'.
-letter(7, L) :- L='G'.
-
-%turn(+Player, -Color)
-%Color of each player for display
-turn(red,'Red').
-turn(yellow,'Yellow').
-
 %score(+Player, -score)
 %Gets each player score
 score(red, 0).
@@ -75,43 +56,44 @@ stones(yellow, 10).
 %Removes a stone from player count
 %removeStone(+Player) :- drop(+Player, N), N1 is N -1, push(+Player, N1).
 
-%displayGame(+GameState,+Player)
-%Display the given state of the game and the current turn player
-displayGame(GameState,Player) :-
-    turn(Player, P),
-    score(red,RedScore),
-    score(yellow,YellowScore),
-    stones(Player,Stones),
-    format("Turn: ~w~n",P),
-    format("Stones: ~w~n",Stones),
-    format("Score: ~n",[]),
-    format("    Red: ~w     Yellow: ~w~n",[RedScore,YellowScore]),
-    write('   | 1 | 2 | 3 | 4 | 5 | 6 | 7 |\n'),
-    write('---|---|---|---|---|---|---|---|\n'),
-    printLines(GameState, 1).
+%readPlayerFromPosition(-Line, -Column)
+readPlayerFromPosition(Line,Column) :-
+    write('Move from line(A-G):\n'), 
+    read(LineLetter),
+    letter(Line,LineLetter),
+    write('Move from column(1-7):\n'),
+    read(Column)
+.
 
-%printLines(+GameState, +Line)
-%Prints the Nth line of the Board
-printLines([], 8).
-printLines([Head|Tail], N) :-
-    letter(N, L),
-    write(' '),
-    write(L),
-    N1 is N + 1,
-    write(' | '),
-    printObjects(Head),
-    write('\n---|---|---|---|---|---|---|---|\n'),
-    printLines(Tail, N1).
+%readPlayerToPosition(-Line, -Column)
+readPlayerToPosition(Line,Column) :-
+    write('Move to line(A-G):\n'), 
+    read(LineLetter),
+    letter(Line,LineLetter),
+    write('Move to column(1-7):\n'),
+    read(Column)
+.
 
-%printObjects(+Line)
-%Prints the symbols in a line of the board
-printObjects([]).
-printObjects([Head|Tail]) :-
-    symbol(Head, S),
-    write(S),
-    write(' | '),
-    printObjects(Tail).
+%MovePlayer(+Board,+Player,-NewBoard)
+movePlayer(Board,Player,NewBoard) :- 
+    readPlayerFromPosition(FromLine,FromColumn),
+    at(Board,FromLine,FromColumn, Player),
+    readPlayerToPosition(ToLine, ToColumn),
+    replaceInMatrix(Board,ToLine-1, ToColumn-1, Player, TempBoard),
+    replaceInMatrix(TempBoard,FromLine-1,FromColumn-1,empty,NewBoard)
+.
 
-%play()
+playTurn(Board,Player):-
+    displayGame(Board, Player) , 
+    movePlayer(Board, Player, NewBoard),
+    nextPlayer(Player,NextPlayer),
+    playTurn(NewBoard, NextPlayer)
+.
+
+%play/0
 %Shows the initial state of the game
-play:- initial(Board),middleBoard(Board2),turn(FirstPlayer,'Yellow'), displayGame(Board,FirstPlayer),replaceInMatrix(Board,5,1,yellow,NewBoard),replaceInMatrix(NewBoard,6,0,empty,NewNewBoard),displayGame(NewNewBoard,FirstPlayer).
+play :- 
+    initial(Board), 
+    random_member(Player,[red,yellow]),
+    playTurn(Board,Player)   
+.
