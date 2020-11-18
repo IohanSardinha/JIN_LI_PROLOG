@@ -8,29 +8,19 @@
 %initial(-Board)
 %Initial board state
 initial([
-[red,empty,empty,empty,empty,empty,red],
-[empty,empty,empty,empty,empty,empty,empty],
-[empty,empty,empty,empty,empty,empty,empty],
-[empty,empty,empty,empty,empty,empty,empty],
-[empty,empty,empty,empty,empty,empty,empty],
-[empty,empty,empty,empty,empty,empty,empty],
-[yellow,empty,empty,empty,empty,empty,yellow]
-]).
-
-test([
-[red,red,empty,empty,empty,empty,red],
-[yellow,empty,empty,empty,empty,empty,empty],
-[empty,empty,empty,empty,empty,empty,empty],
-[empty,empty,empty,empty,empty,empty,empty],
-[empty,empty,empty,empty,empty,empty,empty],
-[empty,empty,empty,empty,empty,empty,empty],
-[yellow,empty,empty,empty,empty,empty,yellow]
+['R',' ',' ',' ',' ',' ','R'],
+[' ',' ',' ',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ',' ',' '],
+['Y',' ',' ',' ',' ',' ','Y']
 ]).
 
 %score(+Player, -score)
 %Gets each player score
-score(red, 0).
-score(yellow, 0).
+score('R', 0).
+score('Y', 0).
 
 %addScore(+Player,+Increment)
 %Adds Increment points to player Player
@@ -42,11 +32,11 @@ addScore(Player,N) :-
 
 %stones(+Player, -NumStones)
 %Gets each player stones left
-stones(red,10).
-stones(yellow, 10).
+stones('R',10).
+stones('Y', 10).
 
 %removeStone(+Player)
-%Removes a stone from player count
+%Removes a 'O' from player count
 removeStone(Player) :- 
     retract(stones(Player,Stones)), 
     ReducedStones is Stones -1, 
@@ -84,51 +74,51 @@ readPlayerToPosition(Line,Column) :-
 .
 
 readPlayerToPosition(Line,Column) :-
-    write("Out of board!\n"),
+    write('Out of board!\n'),
     readPlayerToPosition(Line,Column)
 .
 
 readStonePosition(Board, Line, Column):-
-    write("Dropped stone Line:\n"),
+    write('Dropped stone Line:\n'),
     read(LineLetter),
     letter(Line,LineLetter),
 
-    write("Dropped stone column:\n"),
+    write('Dropped stone column:\n'),
     read(Column),
 
-    at(Board,Line,Column,empty)
+    at(Board,Line,Column,' ')
 .
 
 readStonePosition(Board, Line, Column):-
-    write("Unable to drop stone in that position!\n"),
+    write('Unable to drop stone in that position!\n'),
     readStonePosition(Board,Line,Column)
 .
 
-dropStone(_, Player, _):-
-    stones(Player,Stones),
-    Stones < 1
+dropStone(Board , Player, NewBoard):-
+    stones(Player,0),
+    NewBoard = Board
 .
 
 dropStone(Board, Player, NewBoard):-
     readStonePosition(Board,Line,Column),
     LineIndex is Line -1,
     ColumnIndex is Column -1,
-    replaceInMatrix(Board, LineIndex,ColumnIndex, stone, NewBoard),
+    replaceInMatrix(Board, LineIndex,ColumnIndex, 'O', NewBoard),
     removeStone(Player)
 .
 
 %addFishCount(+Board, +Line, +Column, +OldCount, -NewCount)
 addFishCount(Board,Line,Column, OldCount, NewCount) :-
-    at(Board, Line, Column, red),
+    at(Board, Line, Column, 'R'),
     NewCount is OldCount+1
 .
 
 addFishCount(Board,Line,Column, OldCount, NewCount) :-
-    at(Board, Line, Column, yellow),
+    at(Board, Line, Column, 'Y'),
     NewCount is OldCount+1
 .
 
-addFishCount(_,_,_, OldCount, NewCount) :-
+addFishCount(_, _, _, OldCount, NewCount) :-
     NewCount = OldCount
 .
 
@@ -155,7 +145,7 @@ movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :-
     replaceInMatrix(Board,ToLineIndex, ToColumnIndex, Player, TempBoard1),
     FromLineIndex is FromLine - 1,
     FromColumnIndex is FromColumn -1,
-    replaceInMatrix(TempBoard1,FromLineIndex,FromColumnIndex,empty,TempBoard2),
+    replaceInMatrix(TempBoard1,FromLineIndex,FromColumnIndex,' ',TempBoard2),
     dropStone(TempBoard2, Player, NewBoard)
 .
 
@@ -166,13 +156,35 @@ movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :-
     replaceInMatrix(Board,ToLineIndex, ToColumnIndex, Player, TempBoard),
     FromLineIndex is FromLine - 1,
     FromColumnIndex is FromColumn -1,
-    replaceInMatrix(TempBoard,FromLineIndex,FromColumnIndex,empty,NewBoard)
+    replaceInMatrix(TempBoard,FromLineIndex,FromColumnIndex,' ',NewBoard)
 .
 
 movePlayer(Board, Player, FromLine , FromColumn, _ , _ , NewBoard) :-
     write('Invalid Move!\n'),
     readPlayerToPosition(ToLine, ToColumn),
     movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard)
+.
+
+nextTurn(Board, 'R') :-
+    score('R', Score),
+    Score > 9,
+    cls,
+    write('Gongratulations!!!\nPlayer RED won the game!!!\n'),
+    displayBoard(Board)
+.
+
+nextTurn(Board, 'Y') :-
+    score('Y', Score),
+    Score > 9,
+    cls,
+    write('Gongratulations!!!\nPlayer YELLOW won the game!!!\n'),
+    displayBoard(Board)
+.
+
+nextTurn(Board, Player) :-
+    cls,
+    nextPlayer(Player, NextPlayer),
+    playTurn(Board, NextPlayer)
 .
 
 playTurn(Board,Player):-
@@ -183,14 +195,25 @@ playTurn(Board,Player):-
     movePlayer(Board, Player,FromLine, FromColumn, ToLine, ToColumn, NewBoard),
     countFish(NewBoard, ToLine, ToColumn, ScoreToAdd),
     addScore(Player,ScoreToAdd),
-    nextPlayer(Player,NextPlayer),
-    playTurn(NewBoard,NextPlayer)
+    nextTurn(NewBoard, Player)
+.
+
+resetData :-
+    retract(score('R',_)),
+    retract(score('Y',_)),
+    retract(stones('R',_)),
+    retract(stones('Y',_)),
+    assert(score('R',9)),
+    assert(score('Y',0)),
+    assert(stones('R',10)),
+    assert(stones('Y',10))
 .
 
 %play/0
 %Shows the initial state of the game
 play :-
+    resetData,
     initial(Board), 
-    random_member(Player,[red,yellow]),
+    random_member(Player,['R','Y']),
     playTurn(Board,Player)   
 .

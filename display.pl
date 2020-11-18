@@ -1,36 +1,34 @@
 %displayGame(+GameState,+Player)
 %Display the given state of the game and the current turn player
 displayGame(GameState,Player) :-
-    turn(Player, P),
-    score(red,RedScore),
-    score(yellow,YellowScore),
-    stones(Player,Stones),
-    format("Turn: ~w~n",P),
+    displayHeader(Player),
+    displayBoard(GameState)
+.
+
+displayHeader(Player):-
+    score('R',RedScore),
+    score('Y',YellowScore),
+    stones(Player, Stones),
+    displayTurn(Player),
     format("Stones: ~w~n",Stones),
-    format("Score: ~n",[]),
-    format("    Red: ~w     Yellow: ~w~n",[RedScore,YellowScore]),
+    format("Score: ~n", []),
+    format("    Red: ~w     Yellow: ~w~n",[RedScore,YellowScore])
+.
+
+displayTurn('Y') :- format("Turn: YELLOW~n",[]).
+displayTurn('R') :- format("Turn: RED~n",[]).
+
+displayBoard(GameState):-
     write('   | 1 | 2 | 3 | 4 | 5 | 6 | 7 |\n'),
     write('---|---|---|---|---|---|---|---|\n'),
-    printLines(GameState, 1).
+    printLines(GameState, 1)
+.
 
-%printLines(+GameState, +Line)
-%Prints the Nth line of the Board
-printLines([], 8).
-printLines([Head|Tail], N) :-
-    letter(N, L),
-    write(' '),
-    write(L),
+printLines([],8).
+printLines([FirstLine|BoardLeftover], N):-
+    letter(N,LineLetter),
+    format(' ~w | ~w | ~w | ~w | ~w | ~w | ~w | ~w |\n',[LineLetter|FirstLine]),
+    write('---|---|---|---|---|---|---|---|\n'),
     N1 is N + 1,
-    write(' | '),
-    printObjects(Head),
-    write('\n---|---|---|---|---|---|---|---|\n'),
-    printLines(Tail, N1).
-
-%printObjects(+Line)
-%Prints the symbols in a line of the board
-printObjects([]).
-printObjects([Head|Tail]) :-
-    symbol(Head, S),
-    write(S),
-    write(' | '),
-    printObjects(Tail).
+    printLines(BoardLeftover, N1)   
+.

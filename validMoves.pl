@@ -2,65 +2,65 @@
 % [ ][X][ ] --> [ ][ ][X]
 % [ ][ ][ ]     [ ][ ][ ]
 validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine + 1,
-    ToColumn =:= FromColumn,
-    at(Board, ToLine, ToColumn, empty)
+    ToLine is FromLine + 1,
+    ToColumn is FromColumn,
+    at(Board, ToLine, ToColumn, ' ')
 .
 % [ ][ ][ ]     [ ][ ][X]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][ ][ ]
 validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine + 1,
-    ToColumn =:= FromColumn + 1,
-    at(Board, ToLine, ToColumn, empty)
+    ToLine is FromLine + 1,
+    ToColumn is FromColumn + 1,
+    at(Board, ToLine, ToColumn, ' ')
 .
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][ ][X]
 validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine + 1,
-    ToColumn =:= FromColumn - 1,
-    at(Board, ToLine, ToColumn, empty)
+    ToLine is FromLine + 1,
+    ToColumn is FromColumn - 1,
+    at(Board, ToLine, ToColumn, ' ')
 .
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [X][ ][ ]
 % [ ][ ][ ]     [ ][ ][ ]
 validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine - 1,
-    ToColumn =:= FromColumn,
-    at(Board, ToLine, ToColumn, empty)
+    ToLine is FromLine - 1,
+    ToColumn is FromColumn,
+    at(Board, ToLine, ToColumn, ' ')
 .
 % [ ][ ][ ]     [X][ ][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][ ][ ]
 validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine - 1,
-    ToColumn =:= FromColumn + 1,
-    at(Board, ToLine, ToColumn, empty)
+    ToLine is FromLine - 1,
+    ToColumn is FromColumn + 1,
+    at(Board, ToLine, ToColumn, ' ')
 .
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [X][ ][ ]
 validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine - 1,
-    ToColumn =:= FromColumn - 1,
-    at(Board, ToLine, ToColumn, empty)
+    ToLine is FromLine - 1,
+    ToColumn is FromColumn - 1,
+    at(Board, ToLine, ToColumn, ' ')
 .
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][X][ ]
 validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine,
-    ToColumn =:= FromColumn - 1,
-    at(Board, ToLine, ToColumn, empty)
+    ToLine is FromLine,
+    ToColumn is FromColumn - 1,
+    at(Board, ToLine, ToColumn, ' ')
 .
 % [ ][ ][ ]     [ ][X][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][ ][ ]
 validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine,
-    ToColumn =:= FromColumn + 1,
-    at(Board, ToLine, ToColumn, empty)
+    ToLine is FromLine,
+    ToColumn is FromColumn + 1,
+    at(Board, ToLine, ToColumn, ' ')
 .
 
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
@@ -69,11 +69,11 @@ validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine,
-    ToColumn =:= FromColumn+2,
+    ToLine is FromLine,
+    ToColumn is FromColumn+2,
     StoneColumn is FromColumn+1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, FromLine, StoneColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, FromLine, StoneColumn, 'O')
 .
 
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
@@ -82,11 +82,11 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine,
-    ToColumn =:= FromColumn-2,
+    ToLine is FromLine,
+    ToColumn is FromColumn-2,
     StoneColumn is FromColumn-1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, FromLine, StoneColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, FromLine, StoneColumn, 'O')
 .
 
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
@@ -95,11 +95,11 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine,
-    ToColumn =:= FromColumn-2,
+    ToLine is FromLine,
+    ToColumn is FromColumn-2,
     StoneColumn is FromColumn-1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, FromLine, StoneColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, FromLine, StoneColumn, 'O')
 .
 
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][X]
@@ -108,12 +108,12 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine+2,
-    ToColumn =:= FromColumn+2,
+    ToLine is FromLine+2,
+    ToColumn is FromColumn+2,
     StoneLine is FromLine + 1,
     StoneColumn is FromColumn+1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, StoneLine, StoneColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, StoneLine, StoneColumn, 'O')
 .
 
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
@@ -122,12 +122,12 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][X]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine-2,
-    ToColumn =:= FromColumn+2,
+    ToLine is FromLine-2,
+    ToColumn is FromColumn+2,
     StoneLine is FromLine - 1,
     StoneColumn is FromColumn+1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, StoneLine, StoneColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, StoneLine, StoneColumn, 'O')
 .
 
 % [ ][ ][ ][ ][ ]     [X][ ][ ][ ][ ]
@@ -136,12 +136,12 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine+2,
-    ToColumn =:= FromColumn-2,
+    ToLine is FromLine+2,
+    ToColumn is FromColumn-2,
     StoneLine is FromLine + 1,
     StoneColumn is FromColumn-1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, StoneLine, StoneColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, StoneLine, StoneColumn, 'O')
 .
 
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
@@ -150,12 +150,12 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [X][ ][ ][ ][ ]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine-2,
-    ToColumn =:= FromColumn-2,
+    ToLine is FromLine-2,
+    ToColumn is FromColumn-2,
     StoneLine is FromLine - 1,
     StoneColumn is FromColumn-1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, StoneLine, StoneColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, StoneLine, StoneColumn, 'O')
 .
 
 % [ ][ ][ ][ ][ ]     [ ][ ][X][ ][ ]
@@ -164,11 +164,11 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine+2,
-    ToColumn =:= FromColumn,
+    ToLine is FromLine+2,
+    ToColumn is FromColumn,
     StoneLine is FromLine + 1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, StoneLine, FromColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, StoneLine, FromColumn, 'O')
 .
 
 % [ ][ ][ ][ ][ ]     [ ][ ][ ][ ][ ]
@@ -177,9 +177,9 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][S][S][S][ ]     [ ][S][S][S][ ]
 % [ ][ ][ ][ ][ ]     [ ][ ][X][ ][ ]
 validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine-2,
-    ToColumn =:= FromColumn,
+    ToLine is FromLine-2,
+    ToColumn is FromColumn,
     StoneLine is FromLine - 1,
-    at(Board, ToLine, ToColumn, empty),
-    at(Board, StoneLine, FromColumn, stone)
+    at(Board, ToLine, ToColumn, ' '),
+    at(Board, StoneLine, FromColumn, 'O')
 .

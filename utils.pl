@@ -12,13 +12,6 @@ replaceInMatrix([H|T], Row, Column, Value, [H|TNew]) :-
         Row1 is Row - 1,
         replaceInMatrix(T, Row1, Column, Value, TNew).
 
-%symbol(+state,-symbol).
-%Symbol to be printed from each board cell state
-symbol(empty,' ').
-symbol(yellow,'Y').
-symbol(stone,'O').
-symbol(red,'R').
-
 %letter(+Number, -Letter).
 %Letter to be printed for each board row
 letter(1, 'A').
@@ -37,14 +30,9 @@ letter(5, e).
 letter(6, f).
 letter(7, g).
 
-%turn(+Player, -Color)
-%Color of each player for display
-turn(red,'Red').
-turn(yellow,'Yellow').
-
 %nextPlayer(+CurrentPlayer, NextPlayer)
-nextPlayer(red,yellow).
-nextPlayer(yellow,red).
+nextPlayer('R','Y').
+nextPlayer('Y','R').
 
 %Clears the screen
 cls :- cls(100).
