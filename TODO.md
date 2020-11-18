@@ -1,4 +1,4 @@
-#TO DO
+# TO DO
 
 - [ ] Consertar a leitura de input
   - [ ] Ler input como texto
