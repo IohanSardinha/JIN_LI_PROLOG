@@ -5,6 +5,7 @@
 :- consult('validMoves.pl').
 :-dynamic score/2.
 :-dynamic stones/2.
+
 %initial(-Board)
 %Initial board state
 initial([
@@ -94,6 +95,7 @@ readStonePosition(Board, Line, Column):-
     readStonePosition(Board,Line,Column)
 .
 
+%dropStone(+Board , +Player, -NewBoard)
 dropStone(Board , Player, NewBoard):-
     stones(Player,0),
     NewBoard = Board
@@ -103,7 +105,7 @@ dropStone(Board, Player, NewBoard):-
     readStonePosition(Board,Line,Column),
     LineIndex is Line -1,
     ColumnIndex is Column -1,
-    replaceInMatrix(Board, LineIndex,ColumnIndex, 'O', NewBoard),
+    replaceInMatrix(Board, LineIndex, ColumnIndex, 'O', NewBoard),
     removeStone(Player)
 .
 
@@ -203,7 +205,8 @@ resetData :-
     retract(score('Y',_)),
     retract(stones('R',_)),
     retract(stones('Y',_)),
-    assert(score('R',9)),
+
+    assert(score('R',0)),
     assert(score('Y',0)),
     assert(stones('R',10)),
     assert(stones('Y',10))
