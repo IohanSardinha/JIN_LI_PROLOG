@@ -56,13 +56,19 @@ stones(yellow, 10).
 %Removes a stone from player count
 %removeStone(+Player) :- drop(+Player, N), N1 is N -1, push(+Player, N1).
 
-%readPlayerFromPosition(-Line, -Column)
-readPlayerFromPosition(Line,Column) :-
+%readPlayerFromPosition(+Player, -Line, -Column)
+readPlayerFromPosition(Board, Player, Line, Column) :-
     write('Move from line(A-G):\n'), 
     read(LineLetter),
     letter(Line,LineLetter),
     write('Move from column(1-7):\n'),
-    read(Column)
+    read(Column),
+    at(Board, Line, Column, Player)
+.
+
+readPlayerFromPosition(Board, Player, Line, Column) :-
+    write('Player not in given position!\n'),
+    readPlayerFromPosition(Board,Player,Line,Column) 
 .
 
 %readPlayerToPosition(-Line, -Column)
@@ -70,29 +76,115 @@ readPlayerToPosition(Line,Column) :-
     write('Move to line(A-G):\n'), 
     read(LineLetter),
     letter(Line,LineLetter),
+    
     write('Move to column(1-7):\n'),
-    read(Column)
+    read(Column),
+    
+    Line < 8,
+    Column < 8,
+    Line > 0,
+    Column > 0
+.
+
+readPlayerToPosition(Line,Column) :-
+    write("Out of board!\n"),
+    readPlayerToPosition(Line,Column)
+.
+
+% [ ][ ][ ]     [ ][ ][ ]
+% [ ][X][ ] --> [ ][ ][X]
+% [ ][ ][ ]     [ ][ ][ ]
+validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+    ToLine =:= FromLine + 1,
+    ToColumn =:= FromColumn,
+    at(Board, ToLine, ToColumn, empty)
+.
+% [ ][ ][ ]     [ ][ ][X]
+% [ ][X][ ] --> [ ][ ][ ]
+% [ ][ ][ ]     [ ][ ][ ]
+validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+    ToLine =:= FromLine + 1,
+    ToColumn =:= FromColumn + 1,
+    at(Board, ToLine, ToColumn, empty)
+.
+% [ ][ ][ ]     [ ][ ][ ]
+% [ ][X][ ] --> [ ][ ][ ]
+% [ ][ ][ ]     [ ][ ][X]
+validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+    ToLine =:= FromLine + 1,
+    ToColumn =:= FromColumn - 1,
+    at(Board, ToLine, ToColumn, empty)
+.
+% [ ][ ][ ]     [ ][ ][ ]
+% [ ][X][ ] --> [X][ ][ ]
+% [ ][ ][ ]     [ ][ ][ ]
+validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+    ToLine =:= FromLine - 1,
+    ToColumn =:= FromColumn,
+    at(Board, ToLine, ToColumn, empty)
+.
+% [ ][ ][ ]     [X][ ][ ]
+% [ ][X][ ] --> [ ][ ][ ]
+% [ ][ ][ ]     [ ][ ][ ]
+validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+    ToLine =:= FromLine - 1,
+    ToColumn =:= FromColumn + 1,
+    at(Board, ToLine, ToColumn, empty)
+.
+% [ ][ ][ ]     [ ][ ][ ]
+% [ ][X][ ] --> [ ][ ][ ]
+% [ ][ ][ ]     [X][ ][ ]
+validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+    ToLine =:= FromLine - 1,
+    ToColumn =:= FromColumn - 1,
+    at(Board, ToLine, ToColumn, empty)
+.
+% [ ][ ][ ]     [ ][ ][ ]
+% [ ][X][ ] --> [ ][ ][ ]
+% [ ][ ][ ]     [ ][X][ ]
+validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+    ToLine =:= FromLine,
+    ToColumn =:= FromColumn - 1,
+    at(Board, ToLine, ToColumn, empty)
+.
+% [ ][ ][ ]     [ ][X][ ]
+% [ ][X][ ] --> [ ][ ][ ]
+% [ ][ ][ ]     [ ][ ][ ]
+validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+    ToLine =:= FromLine,
+    ToColumn =:= FromColumn + 1,
+    at(Board, ToLine, ToColumn, empty)
 .
 
 %MovePlayer(+Board,+Player,-NewBoard)
-movePlayer(Board,Player,NewBoard) :- 
-    readPlayerFromPosition(FromLine,FromColumn),
-    at(Board,FromLine,FromColumn, Player),
+movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
+    validMove(Board, FromLine, FromColumn, ToLine, ToColumn),
+    ToLineIndex is ToLine - 1,
+    ToColumnIndex is ToColumn -1,
+    replaceInMatrix(Board,ToLineIndex, ToColumnIndex, Player, TempBoard),
+    FromLineIndex is FromLine - 1,
+    FromColumnIndex is FromColumn -1,
+    replaceInMatrix(TempBoard,FromLineIndex,FromColumnIndex,empty,NewBoard)
+.
+
+movePlayer(Board, Player, FromLine , FromColumn, _ , _ , NewBoard) :-
+    write('Invalid Move!\n'),
     readPlayerToPosition(ToLine, ToColumn),
-    replaceInMatrix(Board,ToLine-1, ToColumn-1, Player, TempBoard),
-    replaceInMatrix(TempBoard,FromLine-1,FromColumn-1,empty,NewBoard)
+    movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard)
 .
 
 playTurn(Board,Player):-
     displayGame(Board, Player) , 
-    movePlayer(Board, Player, NewBoard),
-    nextPlayer(Player,NextPlayer),
-    playTurn(NewBoard, NextPlayer)
+    readPlayerFromPosition(Board, Player, FromLine, FromColumn),
+    readPlayerToPosition(ToLine, ToColumn),
+    movePlayer(Board, Player,FromLine, FromColumn, ToLine, ToColumn, NewBoard),
+    displayGame(NewBoard,Player)
 .
 
 %play/0
 %Shows the initial state of the game
-play :- 
+play :-
+    cls,
     initial(Board), 
     random_member(Player,[red,yellow]),
     playTurn(Board,Player)   

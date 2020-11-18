@@ -28,7 +28,6 @@ letter(4, L) :- L='D'.
 letter(5, L) :- L='E'.
 letter(6, L) :- L='F'.
 letter(7, L) :- L='G'.
-
 %turn(+Player, -Color)
 %Color of each player for display
 turn(red,'Red').
@@ -39,7 +38,9 @@ nextPlayer(red,yellow).
 nextPlayer(yellow,red).
 
 %Clears the screen
-cls :- write('\33\[2J').
+cls :- cls(100).
+cls(N) :- N > 0, write('\n'), N1 is N -1, cls(N1).
+cls(_).
 
 %at(+Mat, +-Row, +-Col, -+Val)
 at(Mat, Row, Col, Val) :- nth1(Row, Mat, ARow), nth1(Col, ARow, Val).
