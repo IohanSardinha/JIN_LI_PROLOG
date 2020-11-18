@@ -28,6 +28,15 @@ letter(4, L) :- L='D'.
 letter(5, L) :- L='E'.
 letter(6, L) :- L='F'.
 letter(7, L) :- L='G'.
+
+letter(1, L) :- L=a.
+letter(2, L) :- L=b.
+letter(3, L) :- L=c.
+letter(4, L) :- L=d.
+letter(5, L) :- L=e.
+letter(6, L) :- L=f.
+letter(7, L) :- L=g.
+
 %turn(+Player, -Color)
 %Color of each player for display
 turn(red,'Red').

@@ -2,6 +2,9 @@
 :- use_module(library(lists)).
 :- consult('utils.pl').
 :- consult('display.pl').
+:- consult('validMoves.pl').
+:-dynamic score/2.
+:-dynamic stones/2.
 %initial(-Board)
 %Initial board state
 initial([
@@ -14,30 +17,6 @@ initial([
 [yellow,empty,empty,empty,empty,empty,yellow]
 ]).
 
-%middleBoard(-Board)
-%Representation of a middle game board
-middleBoard([
-[empty,empty,empty,empty,empty,empty,empty],
-[stone,empty,stone,empty,red,stone,empty],
-[empty,empty,red,empty,stone,empty,stone],
-[empty,stone,empty,empty,yellow,empty,empty],
-[empty,empty,empty,stone,empty,empty,empty],
-[empty,stone,yellow,empty,empty,empty,empty],
-[empty,empty,empty,empty,stone,empty,empty]
-]).
-
-%finalBoard(-Board)
-%Representation of a won game board
-finalBoard([
-[empty,empty,stone,empty,stone,empty,empty],
-[stone,empty,stone,empty,empty,stone,empty],
-[empty,stone,stone,empty,stone,empty,empty],
-[empty,stone,empty,stone,stone,red,stone],
-[empty,stone,empty,empty,empty,empty,red],
-[stone,stone,yellow,stone,yellow,stone,empty],
-[empty,stone,empty,empty,stone,stone,empty]
-]).
-
 %score(+Player, -score)
 %Gets each player score
 score(red, 0).
@@ -45,7 +24,11 @@ score(yellow, 0).
 
 %addScore(+Player,+Increment)
 %Adds Increment points to player Player
-%addScore(Player,N) :- drop(Player,_), push(Player,N).
+addScore(Player,N) :- 
+    retract(score(Player,Score)),
+    AddedScore is Score + N, 
+    assert(score(Player,AddedScore))
+.
 
 %stones(+Player, -NumStones)
 %Gets each player stones left
@@ -54,7 +37,11 @@ stones(yellow, 10).
 
 %removeStone(+Player)
 %Removes a stone from player count
-%removeStone(+Player) :- drop(+Player, N), N1 is N -1, push(+Player, N1).
+removeStone(Player) :- 
+    retract(stones(Player,Stones)), 
+    ReducedStones is Stones -1, 
+    assert(stones(Player,ReducedStones))
+.
 
 %readPlayerFromPosition(+Player, -Line, -Column)
 readPlayerFromPosition(Board, Player, Line, Column) :-
@@ -91,74 +78,49 @@ readPlayerToPosition(Line,Column) :-
     readPlayerToPosition(Line,Column)
 .
 
-% [ ][ ][ ]     [ ][ ][ ]
-% [ ][X][ ] --> [ ][ ][X]
-% [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine + 1,
-    ToColumn =:= FromColumn,
-    at(Board, ToLine, ToColumn, empty)
+readStonePosition(Board, Line, Column):-
+    write("Dropped stone Line:\n"),
+    read(LineLetter),
+    letter(Line,LineLetter),
+
+    write("Dropped stone column:\n"),
+    read(Column),
+
+    at(Board,Line,Column,empty)
 .
-% [ ][ ][ ]     [ ][ ][X]
-% [ ][X][ ] --> [ ][ ][ ]
-% [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine + 1,
-    ToColumn =:= FromColumn + 1,
-    at(Board, ToLine, ToColumn, empty)
+
+readStonePosition(Board, Line, Column):-
+    write("Unable to drop stone in that position!\n"),
+    readStonePosition(Board,Line,Column)
 .
-% [ ][ ][ ]     [ ][ ][ ]
-% [ ][X][ ] --> [ ][ ][ ]
-% [ ][ ][ ]     [ ][ ][X]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine + 1,
-    ToColumn =:= FromColumn - 1,
-    at(Board, ToLine, ToColumn, empty)
+
+dropStone(_, Player, _):-
+    stones(Player,Stones),
+    Stones < 1
 .
-% [ ][ ][ ]     [ ][ ][ ]
-% [ ][X][ ] --> [X][ ][ ]
-% [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine - 1,
-    ToColumn =:= FromColumn,
-    at(Board, ToLine, ToColumn, empty)
-.
-% [ ][ ][ ]     [X][ ][ ]
-% [ ][X][ ] --> [ ][ ][ ]
-% [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine - 1,
-    ToColumn =:= FromColumn + 1,
-    at(Board, ToLine, ToColumn, empty)
-.
-% [ ][ ][ ]     [ ][ ][ ]
-% [ ][X][ ] --> [ ][ ][ ]
-% [ ][ ][ ]     [X][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine - 1,
-    ToColumn =:= FromColumn - 1,
-    at(Board, ToLine, ToColumn, empty)
-.
-% [ ][ ][ ]     [ ][ ][ ]
-% [ ][X][ ] --> [ ][ ][ ]
-% [ ][ ][ ]     [ ][X][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine,
-    ToColumn =:= FromColumn - 1,
-    at(Board, ToLine, ToColumn, empty)
-.
-% [ ][ ][ ]     [ ][X][ ]
-% [ ][X][ ] --> [ ][ ][ ]
-% [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
-    ToLine =:= FromLine,
-    ToColumn =:= FromColumn + 1,
-    at(Board, ToLine, ToColumn, empty)
+
+dropStone(Board, Player, NewBoard):-
+    readStonePosition(Board,Line,Column),
+    LineIndex is Line -1,
+    ColumnIndex is Column -1,
+    replaceInMatrix(Board, LineIndex,ColumnIndex, stone, NewBoard),
+    removeStone(Player)
 .
 
 %MovePlayer(+Board,+Player,-NewBoard)
 movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
     validMove(Board, FromLine, FromColumn, ToLine, ToColumn),
+    ToLineIndex is ToLine - 1,
+    ToColumnIndex is ToColumn -1,
+    replaceInMatrix(Board,ToLineIndex, ToColumnIndex, Player, TempBoard1),
+    FromLineIndex is FromLine - 1,
+    FromColumnIndex is FromColumn -1,
+    replaceInMatrix(TempBoard1,FromLineIndex,FromColumnIndex,empty,TempBoard2),
+    dropStone(TempBoard2, Player, NewBoard)
+.
+
+movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
+    validJump(Board, FromLine, FromColumn, ToLine, ToColumn),
     ToLineIndex is ToLine - 1,
     ToColumnIndex is ToColumn -1,
     replaceInMatrix(Board,ToLineIndex, ToColumnIndex, Player, TempBoard),
@@ -178,7 +140,9 @@ playTurn(Board,Player):-
     readPlayerFromPosition(Board, Player, FromLine, FromColumn),
     readPlayerToPosition(ToLine, ToColumn),
     movePlayer(Board, Player,FromLine, FromColumn, ToLine, ToColumn, NewBoard),
-    displayGame(NewBoard,Player)
+    nextPlayer(Player,NextPlayer),
+    displayGame(NewBoard,NextPlayer),
+    playTurn(NewBoard,NextPlayer)
 .
 
 %play/0
