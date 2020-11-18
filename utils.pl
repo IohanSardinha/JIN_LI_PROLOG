@@ -14,28 +14,28 @@ replaceInMatrix([H|T], Row, Column, Value, [H|TNew]) :-
 
 %symbol(+state,-symbol).
 %Symbol to be printed from each board cell state
-symbol(empty,S) :- S=' '.
-symbol(yellow,S) :- S='Y'.
-symbol(stone,S) :- S='O'.
-symbol(red,S) :- S='R'.
+symbol(empty,' ').
+symbol(yellow,'Y').
+symbol(stone,'O').
+symbol(red,'R').
 
 %letter(+Number, -Letter).
 %Letter to be printed for each board row
-letter(1, L) :- L='A'.
-letter(2, L) :- L='B'.
-letter(3, L) :- L='C'.
-letter(4, L) :- L='D'.
-letter(5, L) :- L='E'.
-letter(6, L) :- L='F'.
-letter(7, L) :- L='G'.
+letter(1, 'A').
+letter(2, 'B').
+letter(3, 'C').
+letter(4, 'D').
+letter(5, 'E').
+letter(6, 'F').
+letter(7, 'G').
 
-letter(1, L) :- L=a.
-letter(2, L) :- L=b.
-letter(3, L) :- L=c.
-letter(4, L) :- L=d.
-letter(5, L) :- L=e.
-letter(6, L) :- L=f.
-letter(7, L) :- L=g.
+letter(1, a).
+letter(2, b).
+letter(3, c).
+letter(4, d).
+letter(5, e).
+letter(6, f).
+letter(7, g).
 
 %turn(+Player, -Color)
 %Color of each player for display
