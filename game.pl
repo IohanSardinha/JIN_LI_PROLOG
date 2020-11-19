@@ -3,6 +3,7 @@
 :- consult('utils.pl').
 :- consult('display.pl').
 :- consult('validMoves.pl').
+:- consult('menu.pl').
 :-dynamic score/2.
 :-dynamic stones/2.
 
@@ -47,10 +48,13 @@ removeStone(Player) :-
 %readPlayerFromPosition(+Player, -Line, -Column)
 readPlayerFromPosition(Board, Player, Line, Column) :-
     write('Move from line(A-G):\n'), 
-    read(LineLetter),
-    letter(Line,LineLetter),
+    read_line(LineLetter),
+    nth0(0,LineLetter,Linetemp),
+    letter(Line,Linetemp),
     write('Move from column(1-7):\n'),
-    read(Column),
+    read_line(ColumnCode),
+    nth0(0,ColumnCode,Columntemp),
+    letter(Column,Columntemp),
     at(Board, Line, Column, Player)
 .
 
@@ -62,11 +66,15 @@ readPlayerFromPosition(Board, Player, Line, Column) :-
 %readPlayerToPosition(-Line, -Column)
 readPlayerToPosition(Line,Column) :-
     write('Move to line(A-G):\n'), 
-    read(LineLetter),
-    letter(Line,LineLetter),
-    
+    read_line(LineLetter),
+    nth0(0,LineLetter,Linetemp),
+    letter(Line,Linetemp),
     write('Move to column(1-7):\n'),
-    read(Column),
+    read_line(ColumnCode),
+    nth0(0,ColumnCode,Columntemp),
+    letter(Column,Columntemp),
+    
+
     
     Line < 8,
     Column < 8,
@@ -81,11 +89,14 @@ readPlayerToPosition(Line,Column) :-
 
 readStonePosition(Board, Line, Column):-
     write('Dropped stone Line:\n'),
-    read(LineLetter),
-    letter(Line,LineLetter),
+    read_line(LineLetter),
+    nth0(0,LineLetter,Linetemp),
+    letter(Line,Linetemp),
 
     write('Dropped stone column:\n'),
-    read(Column),
+    read_line(ColumnCode),
+    nth0(0,ColumnCode,Columntemp),
+    letter(Column,Columntemp),
 
     at(Board,Line,Column,' ')
 .
@@ -94,6 +105,7 @@ readStonePosition(Board, Line, Column):-
     write('Unable to drop stone in that position!\n'),
     readStonePosition(Board,Line,Column)
 .
+
 
 %dropStone(+Board , +Player, -NewBoard)
 dropStone(Board , Player, NewBoard):-
@@ -180,7 +192,7 @@ nextTurn(Board, 'Y') :-
     Score > 9,
     cls,
     write('Gongratulations!!!\nPlayer YELLOW won the game!!!\n'),
-    displayBoard(Board)
+    displayBoard(Board) 
 .
 
 nextTurn(Board, Player) :-
@@ -215,8 +227,17 @@ resetData :-
 %play/0
 %Shows the initial state of the game
 play :-
+    mainMenu,
+    read_line(ChoiceTemp),
+    nth0(0,ChoiceTemp,Choice),
+    readChoice(Choice)
+       
+.
+
+
+readChoice(49):- 
     resetData,
     initial(Board), 
     random_member(Player,['R','Y']),
-    playTurn(Board,Player)   
+    playTurn(Board,Player) 
 .

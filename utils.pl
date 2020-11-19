@@ -30,6 +30,23 @@ letter(5, e).
 letter(6, f).
 letter(7, g).
 
+letter(1, 49).
+letter(2, 50).
+letter(3, 51).
+letter(4, 52).
+letter(5, 53).
+letter(6, 54).
+letter(7, 55).
+
+
+letter(1, 97).
+letter(2, 98).
+letter(3, 99).
+letter(4, 100).
+letter(5, 101).
+letter(6, 102).
+letter(7, 103).
+
 %nextPlayer(+CurrentPlayer, NextPlayer)
 nextPlayer('R','Y').
 nextPlayer('Y','R').
