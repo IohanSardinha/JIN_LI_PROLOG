@@ -58,3 +58,13 @@ cls(_).
 
 %at(+Mat, +-Row, +-Col, -+Val)
 at(Mat, Row, Col, Val) :- nth1(Row, Mat, ARow), nth1(Col, ARow, Val).
+
+distance2D(X1, Y1, X2, Y2, Distance):- Distance is sqrt((X1 - X2)**2 + (Y1 - Y2)**2).
+
+listSum([],[],[]).
+listSum([A],[B],[C]):- C is A+B.
+listSum([A|TA],[B|TB],[C|TC]) :- C is A+B, listSum(TA,TB,TC).
+
+listSub([],[],[]).
+listSub([A],[B],[C]):- C is A-B.
+listSub([A|TA],[B|TB],[C|TC]) :- C is A-B, listSub(TA,TB,TC).

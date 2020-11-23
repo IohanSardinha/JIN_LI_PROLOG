@@ -21,8 +21,8 @@ initial([
 
 test([
 [' ',' ',' ',' ',' ',' ',' '],
-[' ',' ',' ',' ',' ','R',' '],
-[' ',' ','R',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ',' ',' '],
+[' ',' ','R',' ','R',' ',' '],
 [' ',' ',' ',' ',' ',' ',' '],
 [' ',' ',' ',' ',' ',' ',' '],
 [' ',' ',' ',' ',' ',' ',' '],
@@ -97,8 +97,6 @@ countFish(Board, Line, Column, Count) :-
     addFishCount(Board,Linem1,Columnm1, Count8, Count)
 .
 
-distance2D(X1, Y1, X2, Y2, Distance):- Distance is sqrt((X1 - X2)**2 + (Y1 - Y2)**2).
-
 distanceSum( _ , _ , [], 0, _).
 distanceSum(FromX, FromY, [[ToX,ToY]], Sum, Counter):-
     distance2D(FromX, FromY, ToX, ToY, Distance),
@@ -158,16 +156,19 @@ findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, Temp):-
 .
 findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores):- findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, []).
 
+
+
 %bestMove(+Board, +X, +Y, -BestMove, -BestDistance)
 bestMove(Board, X, Y, BestMove, BestDistance):-
     findAllOtherFishes(Board, X, Y, OtherFishes),
     findAllPossibleMoves(Board, X, Y, AllPossibleMoves),
     findAllMovesScores(Board, X, Y, AllPossibleMoves, Scores),
-    write(AllPossibleMoves),nl,
-    write(Scores),nl,
     findAllDistances(AllPossibleMoves, OtherFishes, Distances),
-    min_member(BestDistance,Distances),
-    nth0(Index, Distances, BestDistance),
+    listSub(Distances, Scores, DistancesLessScores),
+    listSum(Distances, Scores, DistancesPlusScores),
+    min_member(SmallestDistance,Distances),
+    nth0(Index, Distances, SmallestDistance),
+    nth0(Index, DistancesPlusScores, BestDistance),
     nth0(Index, AllPossibleMoves, BestMove),!
 .
 
@@ -206,8 +207,6 @@ dumbBotTurn(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
     random_member(Move, AllPossibleMoves),
     [ToLine, ToColumn] = Move
 .
-
-%initial(Board), at(Board, X, Y, 'R'), [X,Y] \= [Line,Column].
 
 %MovePlayer(+Board,+Player,-NewBoard)
 movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
