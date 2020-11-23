@@ -24,9 +24,9 @@ test([
 [' ',' ',' ',' ',' ',' ',' '],
 [' ',' ','R',' ','R',' ',' '],
 [' ',' ',' ',' ',' ',' ',' '],
+[' ',' ',' ','Y',' ',' ',' '],
 [' ',' ',' ',' ',' ',' ',' '],
-[' ',' ',' ',' ',' ',' ',' '],
-['Y',' ',' ',' ',' ','Y',' ']
+[' ',' ',' ',' ',' ','Y',' ']
 ]).
 
 %score(+Player, -score)
@@ -166,8 +166,8 @@ bestMove(Board, X, Y, BestMove, BestDistance):-
     findAllDistances(AllPossibleMoves, OtherFishes, Distances),
     listSub(Distances, Scores, DistancesLessScores),
     listSum(Distances, Scores, DistancesPlusScores),
-    min_member(SmallestDistance,Distances),
-    nth0(Index, Distances, SmallestDistance),
+    min_member(SmallestDistance,DistancesLessScores),
+    nth0(Index, DistancesLessScores, SmallestDistance),
     nth0(Index, DistancesPlusScores, BestDistance),
     nth0(Index, AllPossibleMoves, BestMove),!
 .
