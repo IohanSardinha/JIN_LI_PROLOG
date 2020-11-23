@@ -1,7 +1,7 @@
 :- use_module(library(random)).
 :- use_module(library(lists)).
 :- consult('utils.pl').
-:- consult('display.pl').
+:- consult('io.pl').
 :- consult('validMoves.pl').
 :- consult('menu.pl').
 :-dynamic score/2.
@@ -17,6 +17,16 @@ initial([
 [' ',' ',' ',' ',' ',' ',' '],
 [' ',' ',' ',' ',' ',' ',' '],
 ['Y',' ',' ',' ',' ',' ','Y']
+]).
+
+test([
+[' ',' ',' ',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ','R',' '],
+[' ',' ','R',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ',' ',' '],
+[' ',' ',' ',' ',' ',' ',' '],
+['Y',' ',' ',' ',' ','Y',' ']
 ]).
 
 %score(+Player, -score)
@@ -45,68 +55,6 @@ removeStone(Player) :-
     assert(stones(Player,ReducedStones))
 .
 
-%readPlayerFromPosition(+Player, -Line, -Column)
-readPlayerFromPosition(Board, Player, Line, Column) :-
-    write('Move from line(A-G):\n'), 
-    read_line(LineLetter),
-    nth0(0,LineLetter,Linetemp),
-    letter(Line,Linetemp),
-    write('Move from column(1-7):\n'),
-    read_line(ColumnCode),
-    nth0(0,ColumnCode,Columntemp),
-    letter(Column,Columntemp),
-    at(Board, Line, Column, Player)
-.
-
-readPlayerFromPosition(Board, Player, Line, Column) :-
-    write('Player not in given position!\n'),
-    readPlayerFromPosition(Board,Player,Line,Column) 
-.
-
-%readPlayerToPosition(-Line, -Column)
-readPlayerToPosition(Line,Column) :-
-    write('Move to line(A-G):\n'), 
-    read_line(LineLetter),
-    nth0(0,LineLetter,Linetemp),
-    letter(Line,Linetemp),
-    write('Move to column(1-7):\n'),
-    read_line(ColumnCode),
-    nth0(0,ColumnCode,Columntemp),
-    letter(Column,Columntemp),
-    
-
-    
-    Line < 8,
-    Column < 8,
-    Line > 0,
-    Column > 0
-.
-
-readPlayerToPosition(Line,Column) :-
-    write('Out of board!\n'),
-    readPlayerToPosition(Line,Column)
-.
-
-readStonePosition(Board, Line, Column):-
-    write('Dropped stone Line:\n'),
-    read_line(LineLetter),
-    nth0(0,LineLetter,Linetemp),
-    letter(Line,Linetemp),
-
-    write('Dropped stone column:\n'),
-    read_line(ColumnCode),
-    nth0(0,ColumnCode,Columntemp),
-    letter(Column,Columntemp),
-
-    at(Board,Line,Column,' ')
-.
-
-readStonePosition(Board, Line, Column):-
-    write('Unable to drop stone in that position!\n'),
-    readStonePosition(Board,Line,Column)
-.
-
-
 %dropStone(+Board , +Player, -NewBoard)
 dropStone(Board , Player, NewBoard):-
     stones(Player,0),
@@ -115,9 +63,7 @@ dropStone(Board , Player, NewBoard):-
 
 dropStone(Board, Player, NewBoard):-
     readStonePosition(Board,Line,Column),
-    LineIndex is Line -1,
-    ColumnIndex is Column -1,
-    replaceInMatrix(Board, LineIndex, ColumnIndex, 'O', NewBoard),
+    replaceInMatrix(Board, Line, Column, 'O', NewBoard),
     removeStone(Player)
 .
 
@@ -151,26 +97,130 @@ countFish(Board, Line, Column, Count) :-
     addFishCount(Board,Linem1,Columnm1, Count8, Count)
 .
 
+distance2D(X1, Y1, X2, Y2, Distance):- Distance is sqrt((X1 - X2)**2 + (Y1 - Y2)**2).
+
+distanceSum( _ , _ , [], 0, _).
+distanceSum(FromX, FromY, [[ToX,ToY]], Sum, Counter):-
+    distance2D(FromX, FromY, ToX, ToY, Distance),
+    Sum is Counter + Distance
+.
+distanceSum(FromX, FromY, [[ToX,ToY]|Tail], Sum, Temp):-
+    distance2D(FromX, FromY, ToX, ToY, Distance),
+    Counter is Temp + Distance,
+    distanceSum(FromX, FromY, Tail, Sum, Counter)
+.
+
+distanceSum(FromX, FromY, Positions, Sum):-distanceSum(FromX, FromY, Positions, Sum, 0).
+
+%findAllDistances(PossibleMoves, OtherFishes, Distances, Accumulator).
+findAllDistances([], _ ,[],_).
+
+findAllDistances([[ToLine,ToColumn]], OtherFishes, Distances, Accumulator):-
+    distanceSum(ToLine, ToColumn, OtherFishes, Sum),
+    append(Accumulator, [Sum], Distances)
+.
+
+findAllDistances([[ToLine,ToColumn]|Tail], OtherFishes, Distances, Temp):-
+    distanceSum(ToLine, ToColumn, OtherFishes, Sum),
+    append(Temp,[Sum], Accumulator),
+    findAllDistances(Tail, OtherFishes, Distances, Accumulator)
+.
+findAllDistances([[ToLine,ToColumn]|Tail], OtherFishes, Distances):-findAllDistances([[ToLine,ToColumn]|Tail], OtherFishes, Distances, []).
+
+findAllOtherFishes(Board, FishLine, FishColumn, OtherFishes):-
+    findall([X,Y], (at(Board, X, Y, 'R'), [X,Y] \= [FishLine,FishColumn]), OtherFishesRed),
+    findall([X,Y], (at(Board, X, Y, 'Y'), [X,Y] \= [FishLine,FishColumn]), OtherFishesYellow),
+    append(OtherFishesRed,OtherFishesYellow,OtherFishes)
+.
+
+findAllPossibleMoves(Board, Line, Column, AllPossibleMoves):-
+    findall([X,Y],(validWalk(Board,Line,Column,X,Y)),AllPossibleWalks),
+    findall([X2,Y2],(validJump(Board,Line,Column,X2,Y2)),AllPossibleJumps),
+    append(AllPossibleWalks,AllPossibleJumps,AllPossibleMoves)
+.
+
+%findAllMovesScores(Board, FromX, FromY, AllPossibleMoves, Scores, Accumulator)
+findAllMovesScores(_, _, _ , [] , _, [] ).
+findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]], Scores, Accumulator):-
+    at(Board, FromX, FromY, Value),
+    replaceInMatrix(Board, FromX, FromY, ' ', TempBoard),
+    replaceInMatrix(TempBoard, ToX, ToY, Value, NewBoard),
+    countFish(NewBoard, ToX, ToY, Score),
+    append(Accumulator,[Score], Scores)
+.
+findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, Temp):-
+    at(Board, FromX, FromY, Value),
+    replaceInMatrix(Board, FromX, FromY, ' ', TempBoard),
+    replaceInMatrix(TempBoard, ToX, ToY, Value, NewBoard),
+    countFish(NewBoard, ToX, ToY, Score),
+    append(Temp,[Score], Accumulator),
+    findAllMovesScores(Board, FromX, FromY, Tail, Scores, Accumulator)
+.
+findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores):- findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, []).
+
+%bestMove(+Board, +X, +Y, -BestMove, -BestDistance)
+bestMove(Board, X, Y, BestMove, BestDistance):-
+    findAllOtherFishes(Board, X, Y, OtherFishes),
+    findAllPossibleMoves(Board, X, Y, AllPossibleMoves),
+    findAllMovesScores(Board, X, Y, AllPossibleMoves, Scores),
+    write(AllPossibleMoves),nl,
+    write(Scores),nl,
+    findAllDistances(AllPossibleMoves, OtherFishes, Distances),
+    min_member(BestDistance,Distances),
+    nth0(Index, Distances, BestDistance),
+    nth0(Index, AllPossibleMoves, BestMove),!
+.
+
+bestMove(Board, Player, FromX, FromY, ToX, ToY):-
+    findall([X,Y], at(Board, X, Y, Player), [[FromX,FromY],[SecondX,SecondY]]),
+    
+    bestMove(Board, FromX, FromY, [ToX, ToY], FirstMinDistance),
+    bestMove(Board, SecondX, SecondY, [_,_], SecondMinDistance),
+
+    format('Best 1: ~w, best 2: ~w~n', [FirstMinDistance,SecondMinDistance]),
+    format('~w~n',[[FromX,FromY, SecondX, SecondY]]),
+    FirstMinDistance > SecondMinDistance,
+    write('Move First\n')
+    
+.
+
+bestMove(Board, Player, FromX, FromY, ToX, ToY):-
+    findall([X,Y], at(Board, X, Y, Player), [[_,_],[FromX,FromY]]),
+    bestMove(Board, FromX, FromY, [ToX, ToY], SecondMinDistance ),
+    write('Move Second\n')
+.
+
+smartBotTurn(Board,Player, FromX, FromY, ToX, ToY):-
+    bestMove(Board, Player, FromX, FromY, ToX, ToY),
+    movePlayer(Board, Player, FromX, FromY, ToX, ToY, NewBoard),
+    displayBoard(NewBoard),
+    read_line(_),
+    smartBotTurn(NewBoard,Player, _, _, _, _)
+.
+
+dumbBotTurn(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
+    findall([X,Y], at(Board, X, Y, Player), PlayerFishes),
+    random_member(PlayerFish, PlayerFishes),
+    [FromLine,FromColumn] = PlayerFish,
+    findAllPossibleMoves(Board, FromLine, FromColumn, AllPossibleMoves),
+    random_member(Move, AllPossibleMoves),
+    [ToLine, ToColumn] = Move
+.
+
+%initial(Board), at(Board, X, Y, 'R'), [X,Y] \= [Line,Column].
+
 %MovePlayer(+Board,+Player,-NewBoard)
 movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
-    validMove(Board, FromLine, FromColumn, ToLine, ToColumn),
-    ToLineIndex is ToLine - 1,
-    ToColumnIndex is ToColumn -1,
-    replaceInMatrix(Board,ToLineIndex, ToColumnIndex, Player, TempBoard1),
-    FromLineIndex is FromLine - 1,
-    FromColumnIndex is FromColumn -1,
-    replaceInMatrix(TempBoard1,FromLineIndex,FromColumnIndex,' ',TempBoard2),
-    dropStone(TempBoard2, Player, NewBoard)
+    validWalk(Board, FromLine, FromColumn, ToLine, ToColumn),
+    replaceInMatrix(Board,ToLine, ToColumn, Player, TempBoard1),
+    replaceInMatrix(TempBoard1,FromLine,FromColumn,' ',NewBoard)
+    %dropStone(TempBoard2, Player, NewBoard)
 .
 
 movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
     validJump(Board, FromLine, FromColumn, ToLine, ToColumn),
-    ToLineIndex is ToLine - 1,
-    ToColumnIndex is ToColumn -1,
-    replaceInMatrix(Board,ToLineIndex, ToColumnIndex, Player, TempBoard),
-    FromLineIndex is FromLine - 1,
-    FromColumnIndex is FromColumn -1,
-    replaceInMatrix(TempBoard,FromLineIndex,FromColumnIndex,' ',NewBoard)
+    replaceInMatrix(Board,ToLine, ToColumn, Player, TempBoard),
+    replaceInMatrix(TempBoard,FromLine,FromColumn,' ',NewBoard)
 .
 
 movePlayer(Board, Player, FromLine , FromColumn, _ , _ , NewBoard) :-

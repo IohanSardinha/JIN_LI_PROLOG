@@ -1,7 +1,7 @@
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [ ][ ][X]
 % [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+validWalk(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     ToLine is FromLine + 1,
     ToColumn is FromColumn,
     at(Board, ToLine, ToColumn, ' ')
@@ -9,7 +9,7 @@ validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][ ][ ]     [ ][ ][X]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+validWalk(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     ToLine is FromLine + 1,
     ToColumn is FromColumn + 1,
     at(Board, ToLine, ToColumn, ' ')
@@ -17,7 +17,7 @@ validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][ ][X]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+validWalk(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     ToLine is FromLine + 1,
     ToColumn is FromColumn - 1,
     at(Board, ToLine, ToColumn, ' ')
@@ -25,7 +25,7 @@ validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [X][ ][ ]
 % [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+validWalk(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     ToLine is FromLine - 1,
     ToColumn is FromColumn,
     at(Board, ToLine, ToColumn, ' ')
@@ -33,7 +33,7 @@ validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][ ][ ]     [X][ ][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+validWalk(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     ToLine is FromLine - 1,
     ToColumn is FromColumn + 1,
     at(Board, ToLine, ToColumn, ' ')
@@ -41,7 +41,7 @@ validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [X][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+validWalk(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     ToLine is FromLine - 1,
     ToColumn is FromColumn - 1,
     at(Board, ToLine, ToColumn, ' ')
@@ -49,7 +49,7 @@ validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][ ][ ]     [ ][ ][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][X][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+validWalk(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     ToLine is FromLine,
     ToColumn is FromColumn - 1,
     at(Board, ToLine, ToColumn, ' ')
@@ -57,7 +57,7 @@ validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
 % [ ][ ][ ]     [ ][X][ ]
 % [ ][X][ ] --> [ ][ ][ ]
 % [ ][ ][ ]     [ ][ ][ ]
-validMove(Board, FromLine, FromColumn, ToLine, ToColumn) :-
+validWalk(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     ToLine is FromLine,
     ToColumn is FromColumn + 1,
     at(Board, ToLine, ToColumn, ' ')
