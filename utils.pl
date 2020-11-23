@@ -68,3 +68,4 @@ listSum([A|TA],[B|TB],[C|TC]) :- C is A+B, listSum(TA,TB,TC).
 listSub([],[],[]).
 listSub([A],[B],[C]):- C is A-B.
 listSub([A|TA],[B|TB],[C|TC]) :- C is A-B, listSub(TA,TB,TC).
+
