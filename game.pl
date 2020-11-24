@@ -147,26 +147,27 @@ findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, Temp):-
 findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores):- findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, []).
 
 
-%bestMove(+Board, +X, +Y, -BestMove, -BestDistance)
-bestMove(Board, X, Y, BestMove, BestDistance):-
+%bestMove(+Board, +X, +Y, -BestMove, -Distance)
+bestMove(Board, X, Y, BestMove, Distance):-
     findAllOtherFishes(Board, X, Y, OtherFishes),
     findAllPossibleMoves(Board, X, Y, AllPossibleMoves),
     findAllMovesScores(Board, X, Y, AllPossibleMoves, Scores),
     findAllDistances(AllPossibleMoves, OtherFishes, Distances),
     listSub(Distances, Scores, DistancesLessScores),
-    listSum(Distances, Scores, DistancesPlusScores),
     min_member(SmallestDistance,DistancesLessScores),
     nth0(Index, DistancesLessScores, SmallestDistance),
-    nth0(Index, DistancesPlusScores, BestDistance),
+    nth0(Index, Scores, Score),
+    distanceSum(X,Y, OtherFishes, DistanceSum),
+    Distance is DistanceSum + (Score*5),%5 = Score weight for choosing move
     nth0(Index, AllPossibleMoves, BestMove),!
 .
 
 bestMove(Board, Player, FromX, FromY, ToX, ToY):-
     findall([X,Y], at(Board, X, Y, Player), [[FromX,FromY],[SecondX,SecondY]]),
     
-    bestMove(Board, FromX, FromY, [ToX, ToY], FirstMinDistance),
-    bestMove(Board, SecondX, SecondY, [_,_], SecondMinDistance),
-    FirstMinDistance > SecondMinDistance
+    bestMove(Board, FromX, FromY, [ToX, ToY], FirstDistance),
+    bestMove(Board, SecondX, SecondY, [_,_], SecondDistance),
+    FirstDistance > SecondDistance
 .
 
 bestMove(Board, Player, FromX, FromY, ToX, ToY):-
@@ -206,12 +207,31 @@ movePlayer(Board, Player, FromLine , FromColumn, _ , _ , NewBoard) :-
     movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard)
 .
 
+moveByMode(Board, 'R', FromLine, FromColumn, ToLine, ToColumn, 'ComputerVsComputer') :-
+    randomMove(Board, 'R', FromLine, FromColumn, ToLine, ToColumn)
+.
+
+moveByMode(Board, 'Y', FromLine, FromColumn, ToLine, ToColumn, 'ComputerVsComputer') :-
+    bestMove(Board, 'Y', FromLine, FromColumn, ToLine, ToColumn)
+.
+
 moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, 'Easy') :-
     randomMove(Board, Computer, FromLine, FromColumn, ToLine, ToColumn)
 .
 
 moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, 'Hard') :-
     bestMove(Board, Computer, FromLine, FromColumn, ToLine, ToColumn)
+.
+
+nextTurnBot(Board, Player, Computer, NewBoard, Line, Column, 'ComputerVsComputer'):-
+    cls,
+    displayGame(Board, Computer),
+    write('Red is easy computer, Yellow is hard computer'),nl,
+    write('Press anything to see next move...'),
+    read_line(_),
+    countFish(NewBoard, Line, Column, ScoreToAdd),
+    addScore(Computer,ScoreToAdd),
+    playerTurn(NewBoard, Player, 'ComputerVsComputer')
 .
 
 nextTurnBot(Board, Player, Computer, NewBoard, Line, Column, GameMode):-
@@ -289,6 +309,14 @@ nextTurn(Board, Player, GameMode) :-
     moveFish(Board,Computer, FromLine, FromColumn, ToLine, ToColumn, NewBoard),
     
     nextTurnBot(Board, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
+.
+
+playerTurn(Board, 'R', 'ComputerVsComputer'):-
+    nextTurn(Board, 'Y', 'ComputerVsComputer')
+.
+
+playerTurn(Board, 'Y', 'ComputerVsComputer'):-
+    nextTurn(Board, 'R', 'ComputerVsComputer')
 .
 
 playerTurn(Board,Player,GameMode):-
@@ -380,7 +408,12 @@ readChoice(51):-
 .
 
 %Computer vs computer
-readChoice(52).
+readChoice(52):-
+    resetData,
+    initial(Board),
+    random_member(Starter,['R','Y']),
+    playerTurn(Board, Starter, 'ComputerVsComputer')
+.
 
 %How to Play
 readChoice(53):-
