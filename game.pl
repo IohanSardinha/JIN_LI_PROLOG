@@ -4,6 +4,7 @@
 :- consult('io.pl').
 :- consult('validMoves.pl').
 :- consult('menu.pl').
+:- consult('bots.pl').
 :-dynamic score/2.
 :-dynamic stones/2.
 
@@ -87,104 +88,6 @@ countFish(Board, Line, Column, Count) :-
     addFishCount(Board,Linem1,Columnm1, Count8, Count)
 .
 
-distanceSum( _ , _ , [], 0, _).
-distanceSum(FromX, FromY, [[ToX,ToY]], Sum, Counter):-
-    distance2D(FromX, FromY, ToX, ToY, Distance),
-    Sum is Counter + Distance
-.
-distanceSum(FromX, FromY, [[ToX,ToY]|Tail], Sum, Temp):-
-    distance2D(FromX, FromY, ToX, ToY, Distance),
-    Counter is Temp + Distance,
-    distanceSum(FromX, FromY, Tail, Sum, Counter)
-.
-
-distanceSum(FromX, FromY, Positions, Sum):-distanceSum(FromX, FromY, Positions, Sum, 0).
-
-%findAllDistances(PossibleMoves, OtherFishes, Distances, Accumulator).
-findAllDistances([], _ ,[],_).
-
-findAllDistances([[ToLine,ToColumn]], OtherFishes, Distances, Accumulator):-
-    distanceSum(ToLine, ToColumn, OtherFishes, Sum),
-    append(Accumulator, [Sum], Distances)
-.
-
-findAllDistances([[ToLine,ToColumn]|Tail], OtherFishes, Distances, Temp):-
-    distanceSum(ToLine, ToColumn, OtherFishes, Sum),
-    append(Temp,[Sum], Accumulator),
-    findAllDistances(Tail, OtherFishes, Distances, Accumulator)
-.
-findAllDistances([[ToLine,ToColumn]|Tail], OtherFishes, Distances):-findAllDistances([[ToLine,ToColumn]|Tail], OtherFishes, Distances, []).
-
-findAllOtherFishes(Board, FishLine, FishColumn, OtherFishes):-
-    findall([X,Y], (at(Board, X, Y, 'R'), [X,Y] \= [FishLine,FishColumn]), OtherFishesRed),
-    findall([X,Y], (at(Board, X, Y, 'Y'), [X,Y] \= [FishLine,FishColumn]), OtherFishesYellow),
-    append(OtherFishesRed,OtherFishesYellow,OtherFishes)
-.
-
-findAllPossibleMoves(Board, Line, Column, AllPossibleMoves):-
-    findall([X,Y],(validWalk(Board,Line,Column,X,Y)),AllPossibleWalks),
-    findall([X2,Y2],(validJump(Board,Line,Column,X2,Y2)),AllPossibleJumps),
-    append(AllPossibleWalks,AllPossibleJumps,AllPossibleMoves)
-.
-
-%findAllMovesScores(Board, FromX, FromY, AllPossibleMoves, Scores, Accumulator)
-findAllMovesScores(_, _, _ , [] , _, [] ).
-findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]], Scores, Accumulator):-
-    at(Board, FromX, FromY, Value),
-    replaceInMatrix(Board, FromX, FromY, ' ', TempBoard),
-    replaceInMatrix(TempBoard, ToX, ToY, Value, NewBoard),
-    countFish(NewBoard, ToX, ToY, Score),
-    append(Accumulator,[Score], Scores)
-.
-findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, Temp):-
-    at(Board, FromX, FromY, Value),
-    replaceInMatrix(Board, FromX, FromY, ' ', TempBoard),
-    replaceInMatrix(TempBoard, ToX, ToY, Value, NewBoard),
-    countFish(NewBoard, ToX, ToY, Score),
-    append(Temp,[Score], Accumulator),
-    findAllMovesScores(Board, FromX, FromY, Tail, Scores, Accumulator)
-.
-findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores):- findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, []).
-
-
-%bestMove(+Board, +X, +Y, -BestMove, -Distance)
-bestMove(Board, X, Y, BestMove, Distance):-
-    findAllOtherFishes(Board, X, Y, OtherFishes),
-    findAllPossibleMoves(Board, X, Y, AllPossibleMoves),
-    findAllMovesScores(Board, X, Y, AllPossibleMoves, Scores),
-    findAllDistances(AllPossibleMoves, OtherFishes, Distances),
-    listSub(Distances, Scores, DistancesLessScores),
-    min_member(SmallestDistance,DistancesLessScores),
-    nth0(Index, DistancesLessScores, SmallestDistance),
-    nth0(Index, Scores, Score),
-    distanceSum(X,Y, OtherFishes, DistanceSum),
-    Distance is DistanceSum + (Score*5),%5 = Score weight for choosing move
-    nth0(Index, AllPossibleMoves, BestMove),!
-.
-
-bestMove(Board, Player, FromX, FromY, ToX, ToY):-
-    findall([X,Y], at(Board, X, Y, Player), [[FromX,FromY],[SecondX,SecondY]]),
-    
-    bestMove(Board, FromX, FromY, [ToX, ToY], FirstDistance),
-    bestMove(Board, SecondX, SecondY, [_,_], SecondDistance),
-    FirstDistance > SecondDistance
-.
-
-bestMove(Board, Player, FromX, FromY, ToX, ToY):-
-    findall([X,Y], at(Board, X, Y, Player), [[_,_],[FromX,FromY]]),
-    bestMove(Board, FromX, FromY, [ToX, ToY], _ )
-.
-
-randomMove(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
-    findall([X,Y], at(Board, X, Y, Player), PlayerFishes),
-    random_member(PlayerFish, PlayerFishes),
-    [FromLine,FromColumn] = PlayerFish,
-    findAllPossibleMoves(Board, FromLine, FromColumn, AllPossibleMoves),
-    random_member(Move, AllPossibleMoves),
-    [ToLine, ToColumn] = Move
-.
-
-
 moveFish(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
     replaceInMatrix(Board,ToLine, ToColumn, Player, TempBoard),
     replaceInMatrix(TempBoard,FromLine,FromColumn,' ',NewBoard)
@@ -223,26 +126,6 @@ moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, 'Hard') :-
     bestMove(Board, Computer, FromLine, FromColumn, ToLine, ToColumn)
 .
 
-nextTurnBot(Board, Player, Computer, NewBoard, Line, Column, 'ComputerVsComputer'):-
-    cls,
-    displayGame(Board, Computer),
-    write('Red is easy computer, Yellow is hard computer'),nl,
-    write('Press anything to see next move...'),
-    read_line(_),
-    countFish(NewBoard, Line, Column, ScoreToAdd),
-    addScore(Computer,ScoreToAdd),
-    playerTurn(NewBoard, Player, 'ComputerVsComputer')
-.
-
-nextTurnBot(Board, Player, Computer, NewBoard, Line, Column, GameMode):-
-    cls,
-    displayGame(Board, Computer),
-    write('Computer\'s turn , press anything to continue...'),
-    read_line(_),
-    countFish(NewBoard, Line, Column, ScoreToAdd),
-    addScore(Computer,ScoreToAdd),
-    playerTurn(NewBoard, Player, GameMode)
-.
 
 nextTurn(Board, 'R', _) :-
     score('R', Score),

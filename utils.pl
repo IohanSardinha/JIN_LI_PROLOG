@@ -79,3 +79,15 @@ listSub([],[],[]).
 listSub([A],[B],[C]):- C is A-B.
 listSub([A|TA],[B|TB],[C|TC]) :- C is A-B, listSub(TA,TB,TC).
 
+distanceSum( _ , _ , [], 0, _).
+distanceSum(FromX, FromY, [[ToX,ToY]], Sum, Counter):-
+    distance2D(FromX, FromY, ToX, ToY, Distance),
+    Sum is Counter + Distance
+.
+distanceSum(FromX, FromY, [[ToX,ToY]|Tail], Sum, Temp):-
+    distance2D(FromX, FromY, ToX, ToY, Distance),
+    Counter is Temp + Distance,
+    distanceSum(FromX, FromY, Tail, Sum, Counter)
+.
+
+distanceSum(FromX, FromY, Positions, Sum):-distanceSum(FromX, FromY, Positions, Sum, 0).
