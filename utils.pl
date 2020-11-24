@@ -38,7 +38,6 @@ letter(5, 53).
 letter(6, 54).
 letter(7, 55).
 
-
 letter(1, 97).
 letter(2, 98).
 letter(3, 99).
@@ -46,6 +45,14 @@ letter(4, 100).
 letter(5, 101).
 letter(6, 102).
 letter(7, 103).
+
+letter(1, 65).
+letter(2, 66).
+letter(3, 67).
+letter(4, 68).
+letter(5, 69).
+letter(6, 70).
+letter(7, 71).
 
 %nextPlayer(+CurrentPlayer, NextPlayer)
 nextPlayer('R','Y').

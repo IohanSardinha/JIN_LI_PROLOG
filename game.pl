@@ -177,18 +177,12 @@ bestMove(Board, Player, FromX, FromY, ToX, ToY):-
     
     bestMove(Board, FromX, FromY, [ToX, ToY], FirstMinDistance),
     bestMove(Board, SecondX, SecondY, [_,_], SecondMinDistance),
-
-    format('Best 1: ~w, best 2: ~w~n', [FirstMinDistance,SecondMinDistance]),
-    format('~w~n',[[FromX,FromY, SecondX, SecondY]]),
-    FirstMinDistance > SecondMinDistance,
-    write('Move First\n')
-    
+    FirstMinDistance > SecondMinDistance
 .
 
 bestMove(Board, Player, FromX, FromY, ToX, ToY):-
     findall([X,Y], at(Board, X, Y, Player), [[_,_],[FromX,FromY]]),
-    bestMove(Board, FromX, FromY, [ToX, ToY], SecondMinDistance ),
-    write('Move Second\n')
+    bestMove(Board, FromX, FromY, [ToX, ToY], _ )
 .
 
 smartBotTurn(Board,Player, FromX, FromY, ToX, ToY):-
@@ -212,8 +206,8 @@ dumbBotTurn(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
 movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
     validWalk(Board, FromLine, FromColumn, ToLine, ToColumn),
     replaceInMatrix(Board,ToLine, ToColumn, Player, TempBoard1),
-    replaceInMatrix(TempBoard1,FromLine,FromColumn,' ',NewBoard)
-    %dropStone(TempBoard2, Player, NewBoard)
+    replaceInMatrix(TempBoard1,FromLine,FromColumn,' ',TempBoard2),
+    dropStone(TempBoard2, Player, NewBoard)
 .
 
 movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
@@ -275,18 +269,34 @@ resetData :-
 
 %play/0
 %Shows the initial state of the game
-play :-
-    mainMenu,
+play :- cls, mainMenu.
+
+mainMenu :-
+    displayMainMenu,
+    write('Select game mode: '),
     read_line(ChoiceTemp),
+    cls,
     nth0(0,ChoiceTemp,Choice),
     readChoice(Choice)
-       
 .
-
 
 readChoice(49):- 
     resetData,
     initial(Board), 
     random_member(Player,['R','Y']),
     playTurn(Board,Player) 
+.
+
+readChoice(53):- 
+    howToPlay,
+    read_line(_),
+    cls,
+    mainMenu
+.
+
+readChoice(54).
+
+readChoice(_):-
+    write('Invalid option!'),nl,
+    mainMenu
 .

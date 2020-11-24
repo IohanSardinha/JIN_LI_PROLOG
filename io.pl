@@ -5,43 +5,52 @@ displayGame(GameState,Player) :-
     displayBoard(GameState)
 .
 
+displayStones(10):-     format("#  Stones: 10                                           #",[]),nl.
+displayStones(Stones):- format("#  Stones: ~w                                            #",Stones),nl.
+displayScore(RedScore, 10):-         format("#  Red:    ~w     Yellow: 10                             #",[RedScore]),nl.
+displayScore(10, YellowScore):-      format("#  Red:    10     Yellow: ~w                             #",[YellowScore]),nl.
+displayScore(RedScore, YellowScore):-format("#  Red:    ~w     Yellow: ~w                              #",[RedScore,YellowScore]),nl.
+
+
 displayHeader(Player):-
     score('R',RedScore),
     score('Y',YellowScore),
     stones(Player, Stones),
+    write('#########################################################'),nl,
     displayTurn(Player),
-    format("Stones: ~w~n",Stones),
-    format("Score: ~n", []),
-    format("    Red: ~w     Yellow: ~w~n",[RedScore,YellowScore])
+    displayStones(Stones),
+    displayScore(RedScore, YellowScore),
+    write('#########################################################'),nl
 .
 
-displayTurn('Y') :- format("Turn: YELLOW~n",[]).
-displayTurn('R') :- format("Turn: RED~n",[]).
+displayTurn('Y') :- write('#  YELLOW\'S TURN                                        #'),nl.
+displayTurn('R') :- write('#  RED\'S TURN                                           #'),nl.
 
 displayBoard(GameState):-
-    write('   | 1 | 2 | 3 | 4 | 5 | 6 | 7 |\n'),
-    write('---|---|---|---|---|---|---|---|\n'),
-    printLines(GameState, 1)
+    write('#           _______________________________             #\n'),
+    write('#          |   | 1 | 2 | 3 | 4 | 5 | 6 | 7 |            #\n'),
+    write('#          |---|---|---|---|---|---|---|---|            #\n'),
+    printLines(GameState, 1),
+    write('#                                                       #'),nl,
+    write('#########################################################'),nl
 .
 
 printLines([],8).
 printLines([FirstLine|BoardLeftover], N):-
     letter(N,LineLetter),
-    format(' ~w | ~w | ~w | ~w | ~w | ~w | ~w | ~w |\n',[LineLetter|FirstLine]),
-    write('---|---|---|---|---|---|---|---|\n'),
+    format('#          | ~w | ~w | ~w | ~w | ~w | ~w | ~w | ~w |            #\n',[LineLetter|FirstLine]),
+    write('#          |---|---|---|---|---|---|---|---|            #\n'),
     N1 is N + 1,
     printLines(BoardLeftover, N1)   
 .
 
 %readPlayerFromPosition(+Player, -Line, -Column)
 readPlayerFromPosition(Board, Player, Line, Column) :-
-    write('Move from line(A-G):\n'), 
-    read_line(LineLetter),
-    nth0(0,LineLetter,Linetemp),
+    write('From (Ex: A1): '), 
+    read_line(Input),
+    nth0(0,Input,Linetemp),
     letter(Line,Linetemp),
-    write('Move from column(1-7):\n'),
-    read_line(ColumnCode),
-    nth0(0,ColumnCode,Columntemp),
+    nth0(1,Input,Columntemp),
     letter(Column,Columntemp),
     at(Board, Line, Column, Player)
 .
@@ -53,13 +62,11 @@ readPlayerFromPosition(Board, Player, Line, Column) :-
 
 %readPlayerToPosition(-Line, -Column)
 readPlayerToPosition(Line,Column) :-
-    write('Move to line(A-G):\n'), 
-    read_line(LineLetter),
-    nth0(0,LineLetter,Linetemp),
+    write('To   (Ex: B2): '), 
+    read_line(Input),
+    nth0(0,Input,Linetemp),
     letter(Line,Linetemp),
-    write('Move to column(1-7):\n'),
-    read_line(ColumnCode),
-    nth0(0,ColumnCode,Columntemp),
+    nth0(1,Input,Columntemp),
     letter(Column,Columntemp),
     
     Line < 8,
@@ -74,14 +81,12 @@ readPlayerToPosition(Line,Column) :-
 .
 
 readStonePosition(Board, Line, Column):-
-    write('Dropped stone Line:\n'),
-    read_line(LineLetter),
-    nth0(0,LineLetter,Linetemp),
+    write('Drop the stone in (Ex: C3): '),
+    read_line(Input),
+    nth0(0,Input,Linetemp),
     letter(Line,Linetemp),
 
-    write('Dropped stone column:\n'),
-    read_line(ColumnCode),
-    nth0(0,ColumnCode,Columntemp),
+    nth0(1,Input,Columntemp),
     letter(Column,Columntemp),
 
     at(Board,Line,Column,' ')
