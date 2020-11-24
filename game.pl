@@ -268,34 +268,25 @@ nextTurn(Board, Player, GameMode) :-
     nextPlayer(Player, Computer),
     
     moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
-    validJump(Board, FromLine, FromColumn, ToLine, ToColumn),
-    moveFish(Board,Computer, FromLine, FromColumn, ToLine, ToColumn, NewBoard),
     
-    nextTurnBot(Board, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
-.
-
-nextTurn(Board, Player, GameMode) :-
-    nextPlayer(Player, Computer),
-    
+    validWalk(Board, FromLine, FromColumn, ToLine, ToColumn),
     stones(Computer, Stones),
-    Stones < 1,
-    
-    moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
-    moveFish(Board,Computer, FromLine, FromColumn, ToLine, ToColumn, NewBoard),
-    
-    nextTurnBot(Board, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
-.
+    Stones > 0,
 
-nextTurn(Board, Player, GameMode) :-
-    nextPlayer(Player, Computer),
-    
-    moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
     moveFish(Board,Computer, FromLine, FromColumn, ToLine, ToColumn, TempBoard),
-    
     findall([X,Y], at(TempBoard, X, Y, ' '), FreePlaces),
     random_member([StoneLine,StoneColumn], FreePlaces),
     replaceInMatrix(TempBoard, StoneLine, StoneColumn, 'O' , NewBoard),
     removeStone(Computer),
+    
+    nextTurnBot(Board, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
+.
+
+nextTurn(Board, Player, GameMode) :-
+    nextPlayer(Player, Computer),
+    
+    moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
+    moveFish(Board,Computer, FromLine, FromColumn, ToLine, ToColumn, NewBoard),
     
     nextTurnBot(Board, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
 .
