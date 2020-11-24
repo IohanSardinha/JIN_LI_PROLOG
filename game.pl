@@ -19,16 +19,6 @@ initial([
 ['Y',' ',' ',' ',' ',' ','Y']
 ]).
 
-test([
-[' ',' ',' ',' ',' ',' ',' '],
-[' ',' ',' ',' ',' ',' ',' '],
-[' ',' ','R',' ','R',' ',' '],
-[' ',' ',' ',' ',' ',' ',' '],
-[' ',' ',' ','Y',' ',' ',' '],
-[' ',' ',' ',' ',' ',' ',' '],
-[' ',' ',' ',' ',' ','Y',' ']
-]).
-
 %score(+Player, -score)
 %Gets each player score
 score('R', 0).
@@ -157,7 +147,6 @@ findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, Temp):-
 findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores):- findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, []).
 
 
-
 %bestMove(+Board, +X, +Y, -BestMove, -BestDistance)
 bestMove(Board, X, Y, BestMove, BestDistance):-
     findAllOtherFishes(Board, X, Y, OtherFishes),
@@ -185,15 +174,7 @@ bestMove(Board, Player, FromX, FromY, ToX, ToY):-
     bestMove(Board, FromX, FromY, [ToX, ToY], _ )
 .
 
-smartBotTurn(Board,Player, FromX, FromY, ToX, ToY):-
-    bestMove(Board, Player, FromX, FromY, ToX, ToY),
-    movePlayer(Board, Player, FromX, FromY, ToX, ToY, NewBoard),
-    displayBoard(NewBoard),
-    read_line(_),
-    smartBotTurn(NewBoard,Player, _, _, _, _)
-.
-
-dumbBotTurn(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
+randomMove(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
     findall([X,Y], at(Board, X, Y, Player), PlayerFishes),
     random_member(PlayerFish, PlayerFishes),
     [FromLine,FromColumn] = PlayerFish,
@@ -202,18 +183,21 @@ dumbBotTurn(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
     [ToLine, ToColumn] = Move
 .
 
-%MovePlayer(+Board,+Player,-NewBoard)
-movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
-    validWalk(Board, FromLine, FromColumn, ToLine, ToColumn),
-    replaceInMatrix(Board,ToLine, ToColumn, Player, TempBoard1),
-    replaceInMatrix(TempBoard1,FromLine,FromColumn,' ',TempBoard2),
-    dropStone(TempBoard2, Player, NewBoard)
-.
 
-movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
-    validJump(Board, FromLine, FromColumn, ToLine, ToColumn),
+moveFish(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :- 
     replaceInMatrix(Board,ToLine, ToColumn, Player, TempBoard),
     replaceInMatrix(TempBoard,FromLine,FromColumn,' ',NewBoard)
+.
+
+movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :-
+    validWalk(Board, FromLine, FromColumn, ToLine, ToColumn),
+    moveFish(Board,Player, FromLine, FromColumn, ToLine, ToColumn, TempBoard),
+    dropStone(TempBoard, Player, NewBoard)
+.
+
+movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard) :-
+    validJump(Board, FromLine, FromColumn, ToLine, ToColumn),
+    moveFish(Board,Player, FromLine, FromColumn, ToLine, ToColumn, NewBoard)
 .
 
 movePlayer(Board, Player, FromLine , FromColumn, _ , _ , NewBoard) :-
@@ -222,29 +206,101 @@ movePlayer(Board, Player, FromLine , FromColumn, _ , _ , NewBoard) :-
     movePlayer(Board,Player,FromLine,FromColumn, ToLine, ToColumn , NewBoard)
 .
 
-nextTurn(Board, 'R') :-
+moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, 'Easy') :-
+    randomMove(Board, Computer, FromLine, FromColumn, ToLine, ToColumn)
+.
+
+moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, 'Hard') :-
+    bestMove(Board, Computer, FromLine, FromColumn, ToLine, ToColumn)
+.
+
+nextTurnBot(Board, Player, Computer, NewBoard, Line, Column, GameMode):-
+    cls,
+    displayGame(Board, Computer),
+    write('Computer\'s turn , press anything to continue...'),
+    read_line(_),
+    countFish(NewBoard, Line, Column, ScoreToAdd),
+    addScore(Computer,ScoreToAdd),
+    playerTurn(NewBoard, Player, GameMode)
+.
+
+nextTurn(Board, 'R', _) :-
     score('R', Score),
     Score > 9,
     cls,
-    write('Gongratulations!!!\nPlayer RED won the game!!!\n'),
-    displayBoard(Board)
+    write('#########################################################'),nl,
+    write('#                                                       #'),nl,
+    write('#                 !!!CONGRATULATIONS!!!                 #'),nl,
+    write('#                   !!RED PLAYER WON!!                  #'),nl,
+    write('#                                                       #'),nl,
+    write('#########################################################'),nl,
+    displayBoard(Board),
+    write('Press anything to continue...'),
+    read_line(_),
+    cls,
+    mainMenu
 .
 
-nextTurn(Board, 'Y') :-
+nextTurn(Board, 'Y', _) :-
     score('Y', Score),
     Score > 9,
     cls,
-    write('Gongratulations!!!\nPlayer YELLOW won the game!!!\n'),
-    displayBoard(Board) 
+    write('#########################################################'),nl,
+    write('#                                                       #'),nl,
+    write('#                 !!!CONGRATULATIONS!!!                 #'),nl,
+    write('#                 !!YELLOW PLAYER WON!!                 #'),nl,
+    write('#                                                       #'),nl,
+    write('#########################################################'),nl,
+    displayBoard(Board),
+    write('Press anything to continue...'),
+    read_line(_),
+    cls,
+    mainMenu 
 .
 
-nextTurn(Board, Player) :-
+nextTurn(Board, Player, 'Multiplayer') :-
     cls,
     nextPlayer(Player, NextPlayer),
-    playTurn(Board, NextPlayer)
+    playerTurn(Board, NextPlayer, 'Multiplayer')
 .
 
-playTurn(Board,Player):-
+nextTurn(Board, Player, GameMode) :-
+    nextPlayer(Player, Computer),
+    
+    moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
+    validJump(Board, FromLine, FromColumn, ToLine, ToColumn),
+    moveFish(Board,Computer, FromLine, FromColumn, ToLine, ToColumn, NewBoard),
+    
+    nextTurnBot(Board, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
+.
+
+nextTurn(Board, Player, GameMode) :-
+    nextPlayer(Player, Computer),
+    
+    stones(Computer, Stones),
+    Stones < 1,
+    
+    moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
+    moveFish(Board,Computer, FromLine, FromColumn, ToLine, ToColumn, NewBoard),
+    
+    nextTurnBot(Board, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
+.
+
+nextTurn(Board, Player, GameMode) :-
+    nextPlayer(Player, Computer),
+    
+    moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
+    moveFish(Board,Computer, FromLine, FromColumn, ToLine, ToColumn, TempBoard),
+    
+    findall([X,Y], at(TempBoard, X, Y, ' '), FreePlaces),
+    random_member([StoneLine,StoneColumn], FreePlaces),
+    replaceInMatrix(TempBoard, StoneLine, StoneColumn, 'O' , NewBoard),
+    removeStone(Computer),
+    
+    nextTurnBot(Board, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
+.
+
+playerTurn(Board,Player,GameMode):-
     cls,
     displayGame(Board, Player) , 
     readPlayerFromPosition(Board, Player, FromLine, FromColumn),
@@ -252,7 +308,7 @@ playTurn(Board,Player):-
     movePlayer(Board, Player,FromLine, FromColumn, ToLine, ToColumn, NewBoard),
     countFish(NewBoard, ToLine, ToColumn, ScoreToAdd),
     addScore(Player,ScoreToAdd),
-    nextTurn(NewBoard, Player)
+    nextTurn(NewBoard, Player, GameMode)
 .
 
 resetData :-
@@ -275,19 +331,69 @@ mainMenu :-
     displayMainMenu,
     write('Select game mode: '),
     read_line(ChoiceTemp),
-    cls,
     nth0(0,ChoiceTemp,Choice),
     readChoice(Choice)
 .
 
-readChoice(49):- 
+mainMenu('Invalid') :-
+    cls,
+    displayMainMenu,
+    write('Invalid option!!! Select a game mode: '),
+    read_line(ChoiceTemp),
+    nth0(0,ChoiceTemp,Choice),
+    readChoice(Choice)
+.
+
+%Single player easy
+readChoice(49):-
+    write('Choose a color (R,Y):'),
+    read_line(Input),
+    nth0(0,Input,ColorCode),
+    selectColor(ColorCode),
+    letter(ColorCode,Color),
+    cls,
+    resetData,
+    initial(Board),
+    playerTurn(Board, Color, 'Easy')
+.
+
+readChoice(49):-
+    write('Invalid option!!! '),
+    readChoice(49)
+.
+
+%Single player hard
+readChoice(50):-
+    write('Choose a color (R,Y):'),
+    read_line(Input),
+    nth0(0,Input,ColorCode),
+    selectColor(ColorCode),
+    letter(ColorCode,Color),
+    cls,
+    resetData,
+    initial(Board),
+    playerTurn(Board, Color, 'Hard')
+.
+
+readChoice(50):-
+    write('Invalid option!!! '),
+    readChoice(50)
+.
+
+%Multiplayer
+readChoice(51):- 
     resetData,
     initial(Board), 
     random_member(Player,['R','Y']),
-    playTurn(Board,Player) 
+    playerTurn(Board,Player,'Multiplayer') 
 .
 
-readChoice(53):- 
+%Computer vs computer
+readChoice(52).
+
+%How to Play
+readChoice(53):-
+    cls, 
     howToPlay,
     read_line(_),
     cls,
@@ -296,7 +402,7 @@ readChoice(53):-
 
 readChoice(54).
 
-readChoice(_):-
-    write('Invalid option!'),nl,
-    mainMenu
-.
+readChoice(_):- mainMenu('Invalid').
+
+selectColor(82).
+selectColor(89).

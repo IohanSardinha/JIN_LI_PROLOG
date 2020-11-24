@@ -79,5 +79,5 @@ howToPlay:-
     write('#       The first player to score 10 points wins.       #'),nl,                                       
     write('#                                                       #'),nl,
     write('#########################################################'),nl,
-    write('Press anything to continue...'),nl
+    write('Press anything to continue...')
 .

@@ -54,6 +54,9 @@ letter(5, 69).
 letter(6, 70).
 letter(7, 71).
 
+letter(82,'R').
+letter(89,'Y').
+
 %nextPlayer(+CurrentPlayer, NextPlayer)
 nextPlayer('R','Y').
 nextPlayer('Y','R').
