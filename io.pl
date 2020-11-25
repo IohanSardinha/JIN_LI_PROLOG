@@ -1,8 +1,9 @@
 %displayGame(+GameState,+Player)
 %Display the given state of the game and the current turn player
 displayGame(GameState,Player) :-
-    displayHeader(Player),
-    displayBoard(GameState)
+    displayHeader(GameState,Player),
+    board(GameState,Board),
+    displayBoard(Board)
 .
 
 displayStones(10):-     format("#  Stones: 10                                           #",[]),nl.
@@ -12,10 +13,10 @@ displayScore(10, YellowScore):-      format("#  Red:    10     Yellow: ~w       
 displayScore(RedScore, YellowScore):-format("#  Red:    ~w     Yellow: ~w                              #",[RedScore,YellowScore]),nl.
 
 
-displayHeader(Player):-
-    score('R',RedScore),
-    score('Y',YellowScore),
-    stones(Player, Stones),
+displayHeader(GameState,Player):-
+    score('R',GameState,RedScore),
+    score('Y',GameState,YellowScore),
+    stones(Player, GameState, Stones),
     write('#########################################################'),nl,
     displayTurn(Player),
     displayStones(Stones),
@@ -26,11 +27,11 @@ displayHeader(Player):-
 displayTurn('Y') :- write('#  YELLOW\'S TURN                                        #'),nl.
 displayTurn('R') :- write('#  RED\'S TURN                                           #'),nl.
 
-displayBoard(GameState):-
+displayBoard(Board):-
     write('#           _______________________________             #\n'),
     write('#          |   | 1 | 2 | 3 | 4 | 5 | 6 | 7 |            #\n'),
     write('#          |---|---|---|---|---|---|---|---|            #\n'),
-    printLines(GameState, 1),
+    printLines(Board, 1),
     write('#                                                       #'),nl,
     write('#########################################################'),nl
 .

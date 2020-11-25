@@ -82,23 +82,25 @@ randomMove(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
     [ToLine, ToColumn] = Move
 .
 
-nextTurnBot(Board, Player, Computer, NewBoard, Line, Column, 'ComputerVsComputer'):-
+nextTurnBot(GameState, Player, Computer, NewBoard, Line, Column, 'ComputerVsComputer'):-
     cls,
-    displayGame(Board, Computer),
+    displayGame(GameState, Computer),
     write('Red is easy computer, Yellow is hard computer'),nl,
     write('Press anything to see next move...'),
     read_line(_),
     countFish(NewBoard, Line, Column, ScoreToAdd),
-    addScore(Computer,ScoreToAdd),
-    playerTurn(NewBoard, Player, 'ComputerVsComputer')
+    addScore(GameState, Computer, ScoreToAdd, TempGameState),
+    updateBoard(TempGameState, NewBoard, NewGameState),
+    playerTurn(NewGameState, Player, 'ComputerVsComputer')
 .
 
-nextTurnBot(Board, Player, Computer, NewBoard, Line, Column, GameMode):-
+nextTurnBot(GameState, Player, Computer, NewBoard, Line, Column, GameMode):-
     cls,
-    displayGame(Board, Computer),
+    displayGame(GameState, Computer),
     write('Computer\'s turn , press anything to continue...'),
     read_line(_),
     countFish(NewBoard, Line, Column, ScoreToAdd),
-    addScore(Computer,ScoreToAdd),
-    playerTurn(NewBoard, Player, GameMode)
+    addScore(GameState,Computer,ScoreToAdd,TempGameState),
+    updateBoard(TempGameState, NewBoard, NewGameState),
+    playerTurn(NewGameState, Player, GameMode)
 .
