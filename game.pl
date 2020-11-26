@@ -34,21 +34,21 @@ initial(
 board(GameState, Board) :- nth0(0,GameState,Board).
 updateBoard(GameState, NewBoard, NewGameState) :- replaceInList(GameState, 1, NewBoard, NewGameState).
 
-%score(+Player, +GameState, -score)
+%value(+GameState, +Player, -Value)
 %Gets each player score
-score('R', GameState, Score):-nth0(2,GameState,Scores),nth0(0,Scores,Score).
-score('Y', GameState, Score):-nth0(2,GameState,Scores),nth0(1,Scores,Score).
+value(GameState,'R', Score):-nth0(2,GameState,Scores),nth0(0,Scores,Score).
+value(GameState,'Y', Score):-nth0(2,GameState,Scores),nth0(1,Scores,Score).
 
 %addScore(+Player,+Increment)
 %Adds Increment points to player Player
 addScore(GameState, 'R', N, NewGameState) :- 
-    score('R', GameState, Score),
+    value(GameState,'R', Score),
     AddedScore is Score + N, 
     replaceInMatrix(GameState, 3, 1, AddedScore, NewGameState)
 .
 
 addScore(GameState, 'Y', N, NewGameState) :- 
-    score('R', GameState, Score),
+    value(GameState,'Y', Score),
     AddedScore is Score + N, 
     replaceInMatrix(GameState, 3, 2, AddedScore, NewGameState)
 .
@@ -115,53 +115,60 @@ countFish(Board, Line, Column, Count) :-
     addFishCount(Board,Linem1,Columnm1, Count8, Count)
 .
 
-moveFish(GameState,Player,FromLine,FromColumn, ToLine, ToColumn , NewGameState) :-
+moveFish(GameState, Player, FromLine, FromColumn, ToLine, ToColumn , NewGameState) :-
     board(GameState,Board), 
     replaceInMatrix(Board,ToLine, ToColumn, Player, TempBoard),
     replaceInMatrix(TempBoard,FromLine,FromColumn,' ',NewBoard),
     updateBoard(GameState,NewBoard, NewGameState)
 .
 
-movePlayer(GameState,Player,FromLine,FromColumn, ToLine, ToColumn , NewGameState) :-
+move(GameState, [Player, FromLine,FromColumn, ToLine, ToColumn] , NewGameState) :-
     board(GameState,Board), 
     validWalk(Board, FromLine, FromColumn, ToLine, ToColumn),   
     moveFish(GameState,Player, FromLine, FromColumn, ToLine, ToColumn, TempGameState),
     dropStone(TempGameState, Player, NewGameState)
 .
 
-movePlayer(GameState,Player,FromLine,FromColumn, ToLine, ToColumn , NewGameState) :-
+move(GameState, [Player, FromLine, FromColumn, ToLine, ToColumn] , NewGameState) :-
     board(GameState,Board), 
     validJump(Board, FromLine, FromColumn, ToLine, ToColumn),
     moveFish(GameState,Player, FromLine, FromColumn, ToLine, ToColumn, NewGameState)
 .
 
-movePlayer(GameState, Player, FromLine , FromColumn, _ , _ , NewGameState) :-
+%move(+Gamestate, +Move, -NewGameState).
+move(GameState, [Player, FromLine , FromColumn, _ , _] , NewGameState) :-
     write('Invalid Move!\n'),
     readPlayerToPosition(ToLine, ToColumn),
-    movePlayer(GameState,Player,FromLine,FromColumn, ToLine, ToColumn , NewGameState)
+    move(GameState,[Player,FromLine,FromColumn, ToLine, ToColumn] , NewGameState)
 .
 
-moveByMode(Board, 'R', FromLine, FromColumn, ToLine, ToColumn, 'ComputerVsComputer') :-
-    randomMove(Board, 'R', FromLine, FromColumn, ToLine, ToColumn)
+moveByMode(GameState, 'R', FromLine, FromColumn, ToLine, ToColumn, 'ComputerVsComputer') :-
+    choose_move(GameState, 'R', 'Easy', [FromLine, FromColumn, ToLine, ToColumn])
 .
 
-moveByMode(Board, 'Y', FromLine, FromColumn, ToLine, ToColumn, 'ComputerVsComputer') :-
-    bestMove(Board, 'Y', FromLine, FromColumn, ToLine, ToColumn)
+moveByMode(GameState, 'Y', FromLine, FromColumn, ToLine, ToColumn, 'ComputerVsComputer') :-
+    choose_move(GameState, 'Y', 'Hard', [FromLine, FromColumn, ToLine, ToColumn])
 .
 
-moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, 'Easy') :-
-    randomMove(Board, Computer, FromLine, FromColumn, ToLine, ToColumn)
-.
-
-moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, 'Hard') :-
-    bestMove(Board, Computer, FromLine, FromColumn, ToLine, ToColumn)
+moveByMode(GameState, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode) :-
+    choose_move(GameState, Computer, GameMode, [FromLine, FromColumn, ToLine, ToColumn])
 .
 
 
-nextTurn(GameState, 'R', _) :-
+%game_over(+GameState, -Winner).
+game_over(GameState, 'R'):-
+    value(GameState,'R', Score),
+    Score > 9
+.
+
+game_over(GameState, 'Y'):-
+    value(GameState,'Y', Score),
+    Score > 9
+.
+
+nextTurn(GameState, 'R', _ ) :-
     board(GameState, Board),
-    score('R',GameState, Score),
-    Score > 9,
+    game_over(GameState,'R'),
     cls,
     write('#########################################################'),nl,
     write('#                                                       #'),nl,
@@ -176,10 +183,9 @@ nextTurn(GameState, 'R', _) :-
     mainMenu
 .
 
-nextTurn(GameState, 'Y', _) :-
+nextTurn(GameState, 'Y', _ ) :-
     board(GameState, Board),
-    score('Y',GameState, Score),
-    Score > 9,
+    game_over(GameState,'Y'),
     cls,
     write('#########################################################'),nl,
     write('#                                                       #'),nl,
@@ -204,7 +210,7 @@ nextTurn(GameState, Player, GameMode) :-
     board(GameState, Board),
     nextPlayer(Player, Computer),
     
-    moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
+    moveByMode(GameState, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
     
     validWalk(Board, FromLine, FromColumn, ToLine, ToColumn),
     stones(Computer,GameState, Stones),
@@ -218,17 +224,23 @@ nextTurn(GameState, Player, GameMode) :-
     replaceInMatrix(TempBoard, StoneLine, StoneColumn, 'O' , NewBoard),
     removeStone(GameState,Computer,NewGameState),
     
+    cls,
+    displayGame(GameState, Computer),
+
     nextTurnBot(NewGameState, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
 .
 
 nextTurn(GameState, Player, GameMode) :-
-    board(GameState, Board),
+
     nextPlayer(Player, Computer),
     
-    moveByMode(Board, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
+    moveByMode(GameState, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
     moveFish(GameState,Computer, FromLine, FromColumn, ToLine, ToColumn, NewGameState),
     board(NewGameState, NewBoard),
     
+    cls,
+    displayGame(GameState, Computer),
+
     nextTurnBot(GameState, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
 .
 
@@ -246,7 +258,7 @@ playerTurn(GameState,Player,GameMode):-
     displayGame(GameState, Player) , 
     readPlayerFromPosition(Board, Player, FromLine, FromColumn),
     readPlayerToPosition(ToLine, ToColumn),
-    movePlayer(GameState, Player,FromLine, FromColumn, ToLine, ToColumn, TempGameState1),
+    move(GameState, [Player,FromLine, FromColumn, ToLine, ToColumn], TempGameState1),
     board(TempGameState1, NewBoard),
     countFish(NewBoard, ToLine, ToColumn, ScoreToAdd),
     addScore(TempGameState1,Player, ScoreToAdd,TempGameState2),
@@ -256,9 +268,10 @@ playerTurn(GameState,Player,GameMode):-
 
 %play/0
 %Shows the initial state of the game
-play :- cls, mainMenu.
+play :- mainMenu.
 
 mainMenu :-
+    cls,
     displayMainMenu,
     write('Select game mode: '),
     read_line(ChoiceTemp),

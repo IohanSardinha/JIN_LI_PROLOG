@@ -183,3 +183,11 @@ validJump(Board, FromLine, FromColumn, ToLine, ToColumn) :-
     at(Board, ToLine, ToColumn, ' '),
     at(Board, StoneLine, FromColumn, 'O')
 .
+
+valid_moves(GameState, Player, ListOfMoves):-
+    board(GameState, Board),
+    findall([X,Y], at(Board, X, Y, Player), [[FirstX,FirstY],[SecondX,SecondY]]),
+    findAllPossibleMoves(Board, FirstX, FirstY, AllFirstPossibleMoves),
+    findAllPossibleMoves(Board, SecondX, SecondY, AllSecondPossibleMoves),
+    append(AllFirstPossibleMoves,AllSecondPossibleMoves, ListOfMoves)
+.

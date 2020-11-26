@@ -14,8 +14,8 @@ displayScore(RedScore, YellowScore):-format("#  Red:    ~w     Yellow: ~w       
 
 
 displayHeader(GameState,Player):-
-    score('R',GameState,RedScore),
-    score('Y',GameState,YellowScore),
+    value(GameState,'R',RedScore),
+    value(GameState,'Y',YellowScore),
     stones(Player, GameState, Stones),
     write('#########################################################'),nl,
     displayTurn(Player),

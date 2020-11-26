@@ -44,7 +44,6 @@ findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, Temp):-
 .
 findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores):- findAllMovesScores(Board, FromX, FromY, [[ToX,ToY]|Tail], Scores, []).
 
-
 %bestMove(+Board, +X, +Y, -BestMove, -Distance)
 bestMove(Board, X, Y, BestMove, Distance):-
     findAllOtherFishes(Board, X, Y, OtherFishes),
@@ -83,8 +82,6 @@ randomMove(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
 .
 
 nextTurnBot(GameState, Player, Computer, NewBoard, Line, Column, 'ComputerVsComputer'):-
-    cls,
-    displayGame(GameState, Computer),
     write('Red is easy computer, Yellow is hard computer'),nl,
     write('Press anything to see next move...'),
     read_line(_),
@@ -95,12 +92,20 @@ nextTurnBot(GameState, Player, Computer, NewBoard, Line, Column, 'ComputerVsComp
 .
 
 nextTurnBot(GameState, Player, Computer, NewBoard, Line, Column, GameMode):-
-    cls,
-    displayGame(GameState, Computer),
     write('Computer\'s turn , press anything to continue...'),
     read_line(_),
     countFish(NewBoard, Line, Column, ScoreToAdd),
     addScore(GameState,Computer,ScoreToAdd,TempGameState),
     updateBoard(TempGameState, NewBoard, NewGameState),
     playerTurn(NewGameState, Player, GameMode)
+.
+
+%choose_move(+GameState, +Player, +Level, -Move)
+choose_move(GameState, Player, 'Easy', [FromX, FromY, ToX, ToY]):-
+    board(GameState,Board),
+    randomMove(Board, Player, FromX, FromY, ToX, ToY)
+.
+choose_move(GameState, Player, 'Hard', [FromX, FromY, ToX, ToY]):-
+    board(GameState,Board),
+    bestMove(Board, Player, FromX, FromY, ToX, ToY)
 .
