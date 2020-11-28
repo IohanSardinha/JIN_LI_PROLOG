@@ -68,6 +68,14 @@ Demostração dos estados do jogo, inicial, meio e final, respectivamente:
 
 #### Visualização Do Estado do Jogo
 
+Apos invocar o predicado play/0 para iniciar o jogo, é feito display de um menu que permite ao utilizador escolher entre os modos disponíveis.
+ 
+![main_menu](/main_menu.png)
+
+É feita a verificação do input do utilizador, que caso coincida com algum modo de jogo leva o utilizador para o mesmo, e caso contrario pede de novo o input dizendo que o anterior foi invalido.
+
+![invalid_main_menu](/invalid_main_menu.png)
+
 A vizulização do tabuleiro começa por mostrar um cabeçalho, com a cor do jogador atual e o numero das casas como referencia.
 
 Então é chamado o predicato recursivo _printLines_ que recebe o tabuleiro e a linha a ser desenhada, vai unificar através do predicato _letter_ a letra equivalente a cada linha, para apresentar como referencia, chamará _printObjects_ e então chamará _printLines_ com a linha a ser apresentada incrementada em um.
@@ -88,3 +96,4 @@ Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que rec
 
 ![game_over1](/game_over_1.png)
 ![game_over2](/game_over_2.png)
+
