@@ -77,3 +77,14 @@ Já _printObjects_ irá percorrer os elementos da linha e fazer a unificação e
 Codigo responsavel pelo display do Estado de Jogo:
 
 ![Display](/display.png)
+
+#### Lista de Jogadas Válidas
+Existem, como referido em cima dois tipos de movimentos, nadar e saltar. Assim sendo temos de calcular todos os movimentos possíveis, sendo que, no caso de o movimento ser nadar a carpa apenas se pode mover para casas adjacentes e que estejam vazias. Os saltos são possíveis apenas quando existe uma pedra adjacente
+á peça que se pretende mover e a casa imediatamente a seguir a pedra, na mesma direção, se encontra vazia.
+
+#### Final do Jogo
+O jogo chega ao fim quando um dos jogadores atingir pontuação igual a 10 pontos. Assim e necessário verificar depois de cada jogada se a pontuação do jogador que a fez chegou a 10.
+Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que recebe o GameState apos a jogada e retorna em Winner o jogador que fez a jogada caso a sua pontuação seja maior ou igual a 10.  
+
+![game_over1](/game_over1.png)
+![game_over2](/game_over2.png)
