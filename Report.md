@@ -86,5 +86,5 @@ Existem, como referido em cima dois tipos de movimentos, nadar e saltar. Assim s
 O jogo chega ao fim quando um dos jogadores atingir pontuação igual a 10 pontos. Assim e necessário verificar depois de cada jogada se a pontuação do jogador que a fez chegou a 10.
 Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que recebe o GameState apos a jogada e retorna em Winner o jogador que fez a jogada caso a sua pontuação seja maior ou igual a 10.  
 
-![game_over1](/game_over1.png)
-![game_over2](/game_over2.png)
+![game_over1](/game_over_1.png)
+![game_over2](/game_over_2.png)
