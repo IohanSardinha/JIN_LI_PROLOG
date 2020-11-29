@@ -87,10 +87,10 @@ Codigo responsavel pelo display do Estado de Jogo:
 #### Lista de Jogadas Válidas
 Existem, como referido em cima dois tipos de movimentos, nadar e saltar. Assim sendo temos de calcular todos os movimentos possíveis, sendo que, no caso de o movimento ser nadar a carpa apenas se pode mover para casas adjacentes e que estejam vazias. Os saltos são possíveis apenas quando existe uma pedra adjacente
 á peça que se pretende mover e a casa imediatamente a seguir a pedra, na mesma direção, se encontra vazia.
-Assim, como existem duas carpas e necessario calcular todos os movimentos possiveis para cada uma delas. O calculo de todos os movimentos possiveis para uma carpa e feito pelo predicado findAllPossibleMoves.
+Assim, como existem duas carpas é necessario calcular todos os movimentos possiveis para cada uma delas. O cálculo de todos os movimentos possiveis para uma carpa é feito pelo predicado findAllPossibleMoves.
 ![find_all_possible_moves](/find_all_possible_moves.png)
 
-O calculo dos movimentos validos que o jogador pode fazer e depois calculado pelo predicado valid_moves.
+O cálculo dos movimentos válidos que o jogador pode fazer (conjunto dos movimentos possiveis das duas carpas) é depois calculado pelo predicado valid_moves.
 
 ![valid_moves](/valid_moves.png)
 
@@ -98,6 +98,8 @@ O calculo dos movimentos validos que o jogador pode fazer e depois calculado pel
 Para efetuar jogadas foi implementado o predicado move(+Gamestate, +Move, -NewGameState), que recebe um Gamestate e um movimento e após verificar que se trata de um movimento válido retorna NewGameState com a jogada já efetuada.
 ![move1](/move1.png)
 ![move2](/move2.png)
+
+
 O predicado validWalk verifica, no caso de a jogada ser nadar, se o movimento e valido e o predicado moveFish efetua o movimento da carpa, seguido do predicado dropStone que efetua o movimento de pôr a pedra.
 No caso de o movimento ser um salto e verificada a validade deste através do predicado validJump e feito o movimento.
 
@@ -106,7 +108,7 @@ O jogo chega ao fim quando um dos jogadores atingir pontuação igual a 10 ponto
 Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que recebe o GameState apos a jogada e retorna em Winner o jogador que fez a jogada caso a sua pontuação seja maior ou igual a 10.  
 
 ![game_over1](/game_over_1.png)
-![game_over2](/game_over_2.png)
+![game_over2](/game_over_2.png)  
 
 #### Avaliação do Tabuleiro 
 De forma a avaliar o estado de jogo foi implementado o predicado value(+GameState, +Player, -Value), que recebendo um Gamestate e o respetivo jogador (Player), retorna em Value a pontuação do jogador. 
