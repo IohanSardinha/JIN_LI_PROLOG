@@ -115,8 +115,103 @@ De forma a avaliar o estado de jogo foi implementado o predicado value(+GameStat
 ![value](/value.png)
 
 #### Jogada do Computador
-A escolha da jogada a ser efetuada pelo computador varia com a sua dificuldade. Para o bot "easy" são calculados todos os movimentos possiveis e é escolhido um deles de forma random.
-Para o bot "hard" a escolha e baseada na distancia ás demais carpas, e é escolhia a jogada que deixa a carpa mais perto das restantes pois torna-se mais fácil de pontuar.
+A escolha da jogada a ser efetuada pelo computador varia com a sua dificuldade, podenendo ser *easy* ou *hard*.
+
+Para o bot *easy* são calculados todos os movimentos possiveis e é escolhido um deles de forma random. O que pode ser feito através da função randomMove(+Board, +Player, +FromLine, +FromColumn, -ToLine, -ToColumn), como cada jogador possui dois peixes é primeiro sorteado um peixe a se mover e entrão o predicado unifica *ToLine* e *ToColumn* como a posição a qual o peixe vai. 
+
+```
+randomMove(Board, Player, FromLine, FromColumn, ToLine, ToColumn):-
+    findall([X,Y], at(Board, X, Y, Player), PlayerFishes),
+    random_member(PlayerFish, PlayerFishes),
+    [FromLine,FromColumn] = PlayerFish,
+    findAllPossibleMoves(Board, FromLine, FromColumn, AllPossibleMoves),
+    random_member(Move, AllPossibleMoves),
+    [ToLine, ToColumn] = Move
+.
+```
+
+Já para o bot *hard* é escolhida a melhor jogada gananciosa, isto é que vai possibilitar a melhor pontuação ou menor distância aos outros peixes, no momento imediato. Para isso é feito o cálculo da distancia entre cada peixe do computador e todos os demais peixes, desta forma a jogada escolhida para cada peixe é aquela que o deixará mais próximo de todos os outros peixes. Após este cálculo é escolhido qual dos dois peixes irá se mover, isso faz-se através da avaliação das distancia do até os outros peixes juntamente como a possibilidade de pontuação, de tal forma que irá se mover o peixe que está mais distantante dos outros peixes, fazendo sua jogada que o deixará mais próximo, ou o peixe que fazendo sua jogada pontuará mais. Existindo uma relação arbitrária entre a vantagem de pontuar e as unidades de distância, de 1 para 5.
+
+bestMove(+Board, +X, +Y, -BestMove, -Distance)
+Calculo da melhor jogada para cada peixe, onde  *BestMove* é a jogada a ser feita e *Distance* é a composição de distância e pontuação para avaliar qual  dos dois peixes irá se mover. 
+```
+bestMove(Board, X, Y, BestMove, Distance):-
+    findAllOtherFishes(Board, X, Y, OtherFishes),
+    findAllPossibleMoves(Board, X, Y, AllPossibleMoves),
+    findAllMovesScores(Board, X, Y, AllPossibleMoves, Scores),
+    findAllDistances(AllPossibleMoves, OtherFishes, Distances),
+    listSub(Distances, Scores, DistancesLessScores),
+    min_member(SmallestDistance,DistancesLessScores),
+    nth0(Index, DistancesLessScores, SmallestDistance),
+    nth0(Index, Scores, Score),
+    distanceSum(X,Y, OtherFishes, DistanceSum),
+    Distance is DistanceSum + (Score*5),%5 = Score weight for choosing move
+    nth0(Index, AllPossibleMoves, BestMove),!
+```
+
+bestMove(+Board, +Player, -FromX, -FromY, -ToX, -ToY)
+Escolha de qual peixe entre os dois do computador irá se movimentar.
+```
+bestMove(Board, Player, FromX, FromY, ToX, ToY):-
+    findall([X,Y], at(Board, X, Y, Player), [[FromX,FromY],[SecondX,SecondY]]),
+    
+    bestMove(Board, FromX, FromY, [ToX, ToY], FirstDistance),
+    bestMove(Board, SecondX, SecondY, [_,_], SecondDistance),
+    FirstDistance > SecondDistance
+.
+
+bestMove(Board, Player, FromX, FromY, ToX, ToY):-
+    findall([X,Y], at(Board, X, Y, Player), [[_,_],[FromX,FromY]]),
+    bestMove(Board, FromX, FromY, [ToX, ToY], _ )
+.
+```
+
+Após as jogadas do tipo *Walk* se houverem pedras restantes para ser jogadas, uma pedra é colocada no tabuleiro em um local vazio. Dado em vista que: a colocação da pedra acontece após o movimento do jogador, e o resultado desse colocação, se beneficia ou prejudica o adversário, só pode ser percebido depois da jogada do jogador humano e exigiria uma verificação de mais de uma jogada no futuro. Então para esta escolha ser feita de maneira optima não seria possível através de um algoritmo ganancioso como o experado dentro do escopo do projeto. Por isso em ambos os modos *hard* e *easy*  a posição onde a pedra é colocada é escolhida de forma aleatoria.
+
+Movimentação do computador quando se precisa por uma pedra ao tabuleiro:
+```
+nextTurn(GameState, Player, GameMode) :-
+    board(GameState, Board),
+    nextPlayer(Player, Computer),
+    
+    moveByMode(GameState, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
+    
+    validWalk(Board, FromLine, FromColumn, ToLine, ToColumn),
+    stones(Computer,GameState, Stones),
+    Stones > 0,
+
+    moveFish(GameState,Computer, FromLine, FromColumn, ToLine, ToColumn, TempGameState),
+    board(TempGameState, TempBoard),
+    findall([X,Y], at(TempBoard, X, Y, ' '), FreePlaces),
+    random_member([StoneLine,StoneColumn], FreePlaces),
+
+    replaceInMatrix(TempBoard, StoneLine, StoneColumn, 'O' , NewBoard),
+    removeStone(GameState,Computer,NewGameState),
+    
+    cls,
+    displayGame(GameState, Computer),
+
+    nextTurnBot(NewGameState, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
+.
+```
+
+Movimentação quando não se coloca a pedra
+```
+nextTurn(GameState, Player, GameMode) :-
+
+    nextPlayer(Player, Computer),
+    
+    moveByMode(GameState, Computer, FromLine, FromColumn, ToLine, ToColumn, GameMode),
+    moveFish(GameState,Computer, FromLine, FromColumn, ToLine, ToColumn, NewGameState),
+    board(NewGameState, NewBoard),
+    
+    cls,
+    displayGame(GameState, Computer),
+
+    nextTurnBot(GameState, Player, Computer, NewBoard, ToLine, ToColumn, GameMode)
+.
+```
+
 ### Conclusão 
 Em conclusão, achamos que o objetivo do projeto foi alcançado e foram implementadas todas as features pensadas para o jogo. Com este trabalho foi permitido aprofundar e aplicar os conhecimentos adquiridos nas aulas, bem como mudar o paradigma de programação a que estamos habituados com a utilização de linguagens imperativas.
 Foi essa, assim, uma das maiores dificuldades do trabalho uma vez que foi necessário desenvolver o pensamento recursivo mas concluímos que com este desafio ganhamos mais capacidade para implementar o mesmo. Uma das coisas que achamos que poderia ser melhorada seria a implementação de uma melhor Inteligência Artificial para a decisão das jogadas do computador 
