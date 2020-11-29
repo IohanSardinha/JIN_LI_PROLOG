@@ -91,7 +91,7 @@ Existem, como referido em cima dois tipos de movimentos, nadar e saltar. Assim s
 á peça que se pretende mover e a casa imediatamente a seguir a pedra, na mesma direção, se encontra vazia.
 
 #### Execução de Jogadas
-Para efetuar jogadas foi implementado o predicado move(+Gamestate, +Move, -NewGameState), que recebe um Gamestate e um movimento e apos verificar que se trata de um movimento valido retorna NewGameState com a jogada já efetuada.
+Para efetuar jogadas foi implementado o predicado move(+Gamestate, +Move, -NewGameState), que recebe um Gamestate e um movimento e após verificar que se trata de um movimento válido retorna NewGameState com a jogada já efetuada.
 ![move1](/move1.png)
 ![move2](/move2.png)
 #### Final do Jogo
@@ -100,4 +100,6 @@ Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que rec
 
 ![game_over1](/game_over_1.png)
 ![game_over2](/game_over_2.png)
-
+#### Avaliação do Tabuleiro 
+De forma a avaliar o estado de jogo foi implementado o predicado value(+GameState, +Player, -Value), que recebendo um Gamestate e o respetivo jogador (Player), retorna em value a pontuação do jogador. 
+![value](/value.png)
