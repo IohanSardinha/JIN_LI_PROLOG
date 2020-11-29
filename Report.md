@@ -72,7 +72,7 @@ Apos invocar o predicado play/0 para iniciar o jogo, é feito display de um menu
  
 ![main_menu](/main_menu.png)
 
-É feita a verificação do input do utilizador, que caso coincida com algum modo de jogo leva o utilizador para o mesmo, e caso contrario pede de novo o input dizendo que o anterior foi invalido.
+É feita a verificação do input do utilizador, que caso coincida com alguma opção leva o utilizador para a mesma, e caso contrario pede de novo o input dizendo que o anterior foi invalido.
 
 ![invalid_main_menu](/invalid_main_menu.png)
 
@@ -90,6 +90,10 @@ Codigo responsavel pelo display do Estado de Jogo:
 Existem, como referido em cima dois tipos de movimentos, nadar e saltar. Assim sendo temos de calcular todos os movimentos possíveis, sendo que, no caso de o movimento ser nadar a carpa apenas se pode mover para casas adjacentes e que estejam vazias. Os saltos são possíveis apenas quando existe uma pedra adjacente
 á peça que se pretende mover e a casa imediatamente a seguir a pedra, na mesma direção, se encontra vazia.
 
+#### Execução de Jogadas
+Para efetuar jogadas foi implementado o predicado move(+Gamestate, +Move, -NewGameState), que recebe um Gamestate e um movimento e apos verificar que se trata de um movimento valido retorna NewGameState com a jogada já efetuada.
+![move1](/move1.png)
+![move2](/move2.png)
 #### Final do Jogo
 O jogo chega ao fim quando um dos jogadores atingir pontuação igual a 10 pontos. Assim e necessário verificar depois de cada jogada se a pontuação do jogador que a fez chegou a 10.
 Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que recebe o GameState apos a jogada e retorna em Winner o jogador que fez a jogada caso a sua pontuação seja maior ou igual a 10.  
