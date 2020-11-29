@@ -87,23 +87,34 @@ Codigo responsavel pelo display do Estado de Jogo:
 #### Lista de Jogadas Válidas
 Existem, como referido em cima dois tipos de movimentos, nadar e saltar. Assim sendo temos de calcular todos os movimentos possíveis, sendo que, no caso de o movimento ser nadar a carpa apenas se pode mover para casas adjacentes e que estejam vazias. Os saltos são possíveis apenas quando existe uma pedra adjacente
 á peça que se pretende mover e a casa imediatamente a seguir a pedra, na mesma direção, se encontra vazia.
+Assim, como existem duas carpas e necessario calcular todos os movimentos possiveis para cada uma delas. O calculo de todos os movimentos possiveis para uma carpa e feito pelo predicado findAllPossibleMoves.
+![find_all_possible_moves](/find_all_possible_moves.png)
+
+O calculo dos movimentos validos que o jogador pode fazer e depois calculado pelo predicado valid_moves.
+
+![valid_moves](/valid_moves.png)
 
 #### Execução de Jogadas
 Para efetuar jogadas foi implementado o predicado move(+Gamestate, +Move, -NewGameState), que recebe um Gamestate e um movimento e após verificar que se trata de um movimento válido retorna NewGameState com a jogada já efetuada.
 ![move1](/move1.png)
 ![move2](/move2.png)
+O predicado validWalk verifica, no caso de a jogada ser nadar, se o movimento e valido e o predicado moveFish efetua o movimento da carpa, seguido do predicado dropStone que efetua o movimento de pôr a pedra.
+No caso de o movimento ser um salto e verificada a validade deste através do predicado validJump e feito o movimento.
+
 #### Final do Jogo
 O jogo chega ao fim quando um dos jogadores atingir pontuação igual a 10 pontos. Assim e necessário verificar depois de cada jogada se a pontuação do jogador que a fez chegou a 10.
 Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que recebe o GameState apos a jogada e retorna em Winner o jogador que fez a jogada caso a sua pontuação seja maior ou igual a 10.  
 
 ![game_over1](/game_over_1.png)
 ![game_over2](/game_over_2.png)
+
 #### Avaliação do Tabuleiro 
 De forma a avaliar o estado de jogo foi implementado o predicado value(+GameState, +Player, -Value), que recebendo um Gamestate e o respetivo jogador (Player), retorna em Value a pontuação do jogador. 
 ![value](/value.png)
 
 #### Jogada do Computador
-
+A escolha da jogada a ser efetuada pelo computador varia com a sua dificuldade. Para o bot "easy" são calculados todos os movimentos possiveis e é escolhido um deles de forma random.
+Para o bot "hard" a escolha e baseada na distancia ás demais carpas, e é escolhia a jogada que deixa a carpa mais perto das restantes pois torna-se mais fácil de pontuar.
 ### Conclusão 
 Em conclusão, achamos que o objetivo do projeto foi alcançado e foram implementadas todas as features pensadas para o jogo. Com este trabalho foi permitido aprofundar e aplicar os conhecimentos adquiridos nas aulas, bem como mudar o paradigma de programação a que estamos habituados com a utilização de linguagens imperativas.
 Foi essa, assim, uma das maiores dificuldades do trabalho uma vez que foi necessário desenvolver o pensamento recursivo mas concluímos que com este desafio ganhamos mais capacidade para implementar o mesmo. Uma das coisas que achamos que poderia ser melhorada seria a implementação de uma melhor Inteligência Artificial para a decisão das jogadas do computador 
