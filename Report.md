@@ -76,15 +76,13 @@ Apos invocar o predicado play/0 para iniciar o jogo, é feito display de um menu
 
 ![invalid_main_menu](/invalid_main_menu.png)
 
-A vizulização do tabuleiro começa por mostrar um cabeçalho, com a cor do jogador atual e o numero das casas como referencia.
-
-Então é chamado o predicato recursivo _printLines_ que recebe o tabuleiro e a linha a ser desenhada, vai unificar através do predicato _letter_ a letra equivalente a cada linha, para apresentar como referencia, chamará _printObjects_ e então chamará _printLines_ com a linha a ser apresentada incrementada em um.
-
-Já _printObjects_ irá percorrer os elementos da linha e fazer a unificação entre cada objeto de representação interna de estado e o caracter que será apresentado na tela para represená-lo, através do predicato _symbol_.
-
 Codigo responsavel pelo display do Estado de Jogo:
 
-![Display](/display.png)
+![Display1](/display1.png)
+![Display2](/display2.png)
+![Display3](/display3.png)
+![Display4](/display4.png)
+![Display5](/display5.png)
 
 #### Lista de Jogadas Válidas
 Existem, como referido em cima dois tipos de movimentos, nadar e saltar. Assim sendo temos de calcular todos os movimentos possíveis, sendo que, no caso de o movimento ser nadar a carpa apenas se pode mover para casas adjacentes e que estejam vazias. Os saltos são possíveis apenas quando existe uma pedra adjacente
@@ -101,5 +99,5 @@ Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que rec
 ![game_over1](/game_over_1.png)
 ![game_over2](/game_over_2.png)
 #### Avaliação do Tabuleiro 
-De forma a avaliar o estado de jogo foi implementado o predicado value(+GameState, +Player, -Value), que recebendo um Gamestate e o respetivo jogador (Player), retorna em value a pontuação do jogador. 
+De forma a avaliar o estado de jogo foi implementado o predicado value(+GameState, +Player, -Value), que recebendo um Gamestate e o respetivo jogador (Player), retorna em Value a pontuação do jogador. 
 ![value](/value.png)
