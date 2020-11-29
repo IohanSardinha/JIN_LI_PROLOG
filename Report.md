@@ -37,7 +37,7 @@ O jogo acaba assim que um jogador acumular dez pontos.
 
 ### Lógica do Jogo:
 #### Representação do Estado do Jogo   
-O estado do jogo é representado por:
+O estado do jogo (BoardState) é representado por:
 
 - Tabuleiro
   Constituido de uma lista de listas, com o estado de cada casa do tabuleiro, podendo ser:
@@ -47,12 +47,12 @@ O estado do jogo é representado por:
   - _yellow_ - Carpa amarela
   - _stone_ - Pedra
 
-- Pontuação
-  Valor da pontuação de cada jogador, inicialmente zero para os dois e será incrementado a cada rodada que o jogador pontuar. Através de predicados dinâmicos.
+
 - Quantidade de Pedras de cada jogador
   Quantidade de pedras é inicialmente dez e é decrementada toda vez que um jogador coloca uma pedra no tabuleiro, através de predicados dinâmicos.
-- Jogador da vez
-  Representado por um 0 ou 1 equivalendo a cada jogador, 0 - vermelho e 1 - amarelo. Jogador da vez alterna entre os dois valores de rodada em rodada
+- Pontuação
+  Valor da pontuação de cada jogador, inicialmente zero para os dois e será incrementado a cada rodada que o jogador pontuar. Através de predicados dinâmicos.
+
 
 Demostração dos estados do jogo, inicial, meio e final, respectivamente:
 
@@ -101,6 +101,8 @@ Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que rec
 #### Avaliação do Tabuleiro 
 De forma a avaliar o estado de jogo foi implementado o predicado value(+GameState, +Player, -Value), que recebendo um Gamestate e o respetivo jogador (Player), retorna em Value a pontuação do jogador. 
 ![value](/value.png)
+
+#### Jogada do Computador
 
 ### Conclusão 
 Em conclusão, achamos que o objetivo do projeto foi alcançado e foram implementadas todas as features pensadas para o jogo. Com este trabalho foi permitido aprofundar e aplicar os conhecimentos adquiridos nas aulas, bem como mudar o paradigma de programação a que estamos habituados com a utilização de linguagens imperativas.
