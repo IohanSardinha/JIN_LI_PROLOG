@@ -101,3 +101,11 @@ Com esse fim foi implementado o predicado game_over(+GameState, -Winner) que rec
 #### Avaliação do Tabuleiro 
 De forma a avaliar o estado de jogo foi implementado o predicado value(+GameState, +Player, -Value), que recebendo um Gamestate e o respetivo jogador (Player), retorna em Value a pontuação do jogador. 
 ![value](/value.png)
+
+### Conclusão 
+Em conclusão, achamos que o objetivo do projeto foi alcançado e foram implementadas todas as features pensadas para o jogo. Com este trabalho foi permitido aprofundar e aplicar os conhecimentos adquiridos nas aulas, bem como mudar o paradigma de programação a que estamos habituados com a utilização de linguagens imperativas.
+Foi essa, assim, uma das maiores dificuldades do trabalho uma vez que foi necessário desenvolver o pensamento recursivo mas concluímos que com este desafio ganhamos mais capacidade para implementar o mesmo. Uma das coisas que achamos que poderia ser melhorada seria a implementação de uma melhor Inteligência Artificial para a decisão das jogadas do computador 
+mas pensamos que esse não era um dos objetivos principais do trabalho. Em suma, consideramos que o trabalho foi produtivo e permitiu aprofundar o conhecimento da linguagem Prolog.
+
+### Bibliografia
+https://nestorgames.com/#jinli_detail
