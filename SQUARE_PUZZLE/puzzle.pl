@@ -73,28 +73,48 @@ square(I, J, Matrix, Size):-
 
 isUpperLeft(I, J, Matrix, IsUpperLeft):-
     at(I, J, Matrix, Value),
-    (Value #= 1) #<=> Filled,
 
     TopI is I -1,
     at(TopI, J, Matrix, TopValue),
-    (TopValue #= 0) #<=> TopValid,
 
     LeftJ is J - 1,
     at(I, LeftJ, Matrix, LeftValue),
-    (LeftValue #= 0) #<=> LeftValid,
 
     at(TopI, LeftJ, Matrix, TopLeftValue),
-    (TopLeftValue #= 0) #<=> TopLeftValid,
 
-    (Filled #/\ TopValid #/\ LeftValid #/\ TopLeftValid) #<=> IsUpperLeft
+    (Value #= 1 #/\ TopValue #= 0 #/\ LeftValue #= 0 #/\ TopLeftValue #= 0) #<=> IsUpperLeft
 .
 
 isSquare(I, J, Matrix, Size, IsSquare):-
     squareWidth(I, J, Size, Matrix, Width),
     squareHeight(I, J, Size, Matrix, Height),
 
-    ((Height #>= 1) #/\ (Width #>= 1) #/\ (Height #= Width)) #<=> IsSquare
-    
+    SquareSize #= Width - 1,
+    NewI is I + 1,
+    NewJ is J + 1,
+
+    isSquare(NewI, NewJ, Matrix, Size, SquareSize, NewIsSquare),
+
+
+    ((Height #>= 1) #/\ (Width #>= 1) #/\ (Height #= Width) #/\ NewIsSquare) #<=> IsSquare
+.
+
+isSquare(_, _, _, _, 0, 1).
+
+isSquare(I, J, Matrix, Size, SquareSize, IsSquare):-
+
+    squareWidth(I, J, Size, Matrix, Width),
+    squareHeight(I, J, Size, Matrix, Height),
+
+    at(I,J,Matrix, Value),
+
+    NewI is I + 1,
+    NewJ is J + 1,
+    NewSquareSize #= SquareSize - 1, 
+
+    isSquare(NewI, NewJ, Matrix, Size, NewSquareSize, NewIsSquare),
+
+    ((Height #= Width) #/\ (Height #= SquareSize) #/\ Value #= 1 #/\ NewIsSquare) #<=> IsSquare
 .
 
 squareWidth(I, J, Size, Matrix, Length) :-
@@ -102,7 +122,6 @@ squareWidth(I, J, Size, Matrix, Length) :-
     squareWidth(I, NewJ, Size, Matrix, 1, Length, 1)       
 .
 squareWidth( _, Size, Size, _, _, Acc, Acc).
-squareWidth(I,  J,   _ , Matrix, _, Acc, Acc) :-  at(I, J, Matrix, 0).
 squareWidth(I,  J,   Size, Matrix, LastValue, Length, Acc) :- 
     at(I, J, Matrix, Value),
     ((Value #= 1) #/\  LastValue) #<=> Filled,
@@ -118,8 +137,7 @@ squareHeight(I, J, Size, Matrix, Length) :-
     NewI is I + 1,
     squareHeight(NewI, J, Size, Matrix, 1, Length, 1)       
 .
-squareHeight( _, Size, Size, _, _, Acc, Acc).
-squareHeight(I,  J,   _ , Matrix, _, Acc, Acc) :-  at(I, J, Matrix, 0).
+squareHeight(Size, _, Size, _, _, Acc, Acc).
 squareHeight(I,  J,   Size, Matrix, LastValue, Length, Acc) :- 
     at(I, J, Matrix, Value),
     ((Value #= 1) #/\  LastValue) #<=> Filled,
@@ -134,7 +152,8 @@ squareHeight(I,  J,   Size, Matrix, LastValue, Length, Acc) :-
 puzzle(LinesValues, ColumnsValues, Puzzle):-
     length(LinesValues, Dimension),
     lines(Dimension, LinesValues, Puzzle),
-    columns(Dimension, ColumnsValues, Puzzle)
+    columns(Dimension, ColumnsValues, Puzzle),
+    square(0,0,Puzzle,Dimension)
 .
 
 solve(LinesValues, ColumnsValues, Puzzle):-
