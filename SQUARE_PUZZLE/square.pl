@@ -1,7 +1,6 @@
 :- use_module(library(clpfd)).
 :- use_module(library(lists)).
-
-at(Row, Col, Mat, Val) :- nth0(Row, Mat, ARow), nth0(Col, ARow, Val).
+:- include('display.pl').
 
 puzzle(LinesValues, ColumnsValues) :-
     statistics(runtime, [T0|_]),
@@ -9,57 +8,34 @@ puzzle(LinesValues, ColumnsValues) :-
     length(LinesValues, LinesLength),
     size(LinesLength, Size),
 
-    createRectangles(_, _, _, _, Rectangles, Lines, Columns, Lengths, Size, LinesLength),
+    createRectangles(_, _, _, _, Rectangles, StartX, StartY, Lengths, Size, LinesLength),
 
-    domain(Lines, 1, LinesLength),
-    domain(Columns, 1, LinesLength),
+    domain(StartX, 1, LinesLength),
+    domain(StartY, 1, LinesLength),
     domain(Lengths, 0, LinesLength),
 
     disjoint2(Rectangles, [margin(a,a,1,1)]),
-    lines(Lines, Lengths, 1, LinesValues),
-    lines(Columns, Lengths, 1, ColumnsValues),
+    lines(StartX, Lengths, 1, LinesValues),
+    lines(StartY, Lengths, 1, ColumnsValues),
 
-    sortSolution(Lines, Columns),
+    sortSolution(StartX, StartY),
 
-    append(Lines, Columns, V),
+    append(StartX, StartY, V),
     append(V, Lengths, Vars), !,
     labeling([anti_first_fail, bisect, down], Vars), 
 
     statistics(runtime, [T1|_]),
     T is T1 - T0,nl,
+    format('Time to solve: ~d milliseconds.~n', [T]),
 
-    write(Lines), nl,
-    write(Columns), nl,
-    write(Lengths), nl,
+    %write(StartX), nl,
+    %write(StartY), nl,
+    %write(Lengths), nl,
 
-    format('Time to solve: ~d milliseconds~n', [T])
-    %convert(Lines, Columns, Lengths, LinesLength, Matrix), 
+    convert(StartX, StartY, Lengths, LinesLength, Matrix), 
 
-    %displayMatrix(Matrix, LinesLength, 1, LinesValues),nl,
-    %displayColumns(0,LinesLength,ColumnsValues),!,nl
-.
-buildMatrix(Size, Matrix):-
-    buildMatrix(Size, Size, Matrix)
-.
-
-buildMatrix(0, _ , []).
-
-buildMatrix(Size, Length, [Line|Matrix]):-
-    length(Line, Length),
-    domain(Line, 0, 0),
-    NS is Size - 1,
-    buildMatrix(NS,Length, Matrix)
-.
-
-convert(Lines, Columns, Lengths, Size, Matrix):-
-    buildMatrix(Size, Matrix),
-    convert(0, Matrix, Lines, Columns, Lengths, Size)
-.
-
-convert(Index, Matrix, Lines, Columns, Lengths, Size):-
-    nth0(Index, Lines, Line),
-    nth0(Index, Columns, Column),
-    nth0(Index, Length, Length)
+    displayMatrix(Matrix, LinesLength, 1, LinesValues),nl,
+    displayColumns(0,LinesLength,ColumnsValues),!,nl
 .
 
 
@@ -69,47 +45,176 @@ sortSolution([X1,X2|X], [Y1,Y2|Y]):-
     sortSolution([X2|X],[Y2|Y]),!.
 
 
-createRectangles(_, _, _, _, NewRectangles, NewLines, NewColumns, NewLengths, 1, FixedSize) :-
+% ----------------------- Converts Lists to Matrix ---------------------------------
+filter_lists_Aux(StartX, StartY, Lengths, 1, StartXFiltered, StartYFiltered, LengthsFiltered) :-
+    nth1(1, Lengths, Elem),
+    Elem > 0,
+    append([], [Elem], LengthsFiltered),
+    nth1(1, StartX, ElemX),
+    nth1(1, StartY, ElemY),
+    append([], [ElemX], StartXFiltered),
+    append([], [ElemY], StartYFiltered)
+.
+
+filter_lists_Aux(StartX, StartY, Lengths, 1, StartXFiltered, StartYFiltered, LengthsFiltered) :-
+    nth1(NewLengthsSize, Lengths, Elem),
+    Elem == 0,
+    StartXFiltered = [],
+    StartYFiltered = [],
+    LengthsFiltered = [].
+filter_lists_Aux(StartX, StartY, Lengths, LengthsSize, NewStartXFiltered, NewStartYFiltered, NewLengthsFiltered) :-
+    NewLengthsSize is LengthsSize - 1,
+    nth1(LengthsSize, Lengths, Elem),
+    Elem > 0,
+    filter_lists_Aux(StartX, StartY, Lengths, NewLengthsSize, StartXFiltered, StartYFiltered, LengthsFiltered),
+    append(LengthsFiltered, [Elem], NewLengthsFiltered),
+    nth1(LengthsSize, StartX, ElemX),
+    nth1(LengthsSize, StartY, ElemY),
+    append(StartXFiltered, [ElemX], NewStartXFiltered),
+    append(StartYFiltered, [ElemY], NewStartYFiltered).
+filter_lists_Aux(StartX, StartY, Lengths, LengthsSize, NewStartXFiltered, NewStartYFiltered, NewLengthsFiltered) :-
+    NewLengthsSize is LengthsSize - 1,
+    nth1(LengthsSize, Lengths, Elem),
+    Elem == 0,
+    filter_lists_Aux(StartX, StartY, Lengths, NewLengthsSize, NewStartXFiltered, NewStartYFiltered, NewLengthsFiltered).
+
+filter_lists(StartX, StartY, Lengths, StartXFiltered, StartYFiltered, LengthsFiltered) :-
+    length(Lengths, LengthsSize),
+    filter_lists_Aux(StartX, StartY, Lengths, LengthsSize, StartXFiltered, StartYFiltered, LengthsFiltered).
+
+
+build_matrix(LinesLength, LinesLength, [H | []]) :-
+    length(List, LinesLength),
+    append([], List, H).
+build_matrix(LinesLength, ColumnSize, [H | T]) :-
+    NewColumnSize is ColumnSize + 1,
+    build_matrix(LinesLength, NewColumnSize, T),
+    length(List, LinesLength),
+    append([], List, H).
+
+
+fill_row(StartY, 1, Max, Row) :-
+    nth1(StartY, Row, Elem),
+    Elem = 1.
+fill_row(StartY, Size, SizeConst, Row) :-
+    NewStartY is StartY + 1,
+    NewSize is Size - 1,
+    fill_row(NewStartY, NewSize, SizeConst, Row),
+    nth1(StartY, Row, Elem),
+    Elem = 1.
+
+
+fill_aux(StartX, StartY, 1, SizeConst, Matrix) :-
+    nth1(StartX, Matrix, Row),
+    Max is StartY + 1,
+    fill_row(StartY, SizeConst, Max, Row).
+fill_aux(StartX, StartY, Size, SizeConst, Matrix) :-
+    NewStartX is StartX + 1,
+    NewSize is Size -1,
+    fill_aux(NewStartX, StartY, NewSize, SizeConst, Matrix),
+    nth1(StartX, Matrix, Row),
+    fill_row(StartY, SizeConst, SizeConst, Row).
+
+
+fill_matrix(StartXFiltered, StartYFiltered, LengthsFiltered, 1, Matrix, FilledMatrix) :-
+    nth1(1, StartXFiltered, StartXNumber),
+    nth1(1, StartYFiltered, StartYNumber),
+    nth1(StartXNumber, Matrix, Row),
+    nth1(StartYNumber, Row, Elem),
+    Elem = 1,
+    nth1(1, LengthsFiltered, Size),
+    fill_aux(StartXNumber, StartYNumber, Size, Size, Matrix).
+fill_matrix(StartXFiltered, StartYFiltered, LengthsFiltered, AuxSize, Matrix, FilledMatrix) :-
+    NewAuxSize is AuxSize - 1,
+    fill_matrix(StartXFiltered, StartYFiltered, LengthsFiltered, NewAuxSize, Matrix, FilledMatrix),
+    nth1(AuxSize, StartXFiltered, StartXNumber),
+    nth1(AuxSize, StartYFiltered, StartYNumber),
+    nth1(StartXNumber, Matrix, Row),
+    nth1(StartYNumber, Row, Elem),
+    Elem = 1,
+    nth1(AuxSize, LengthsFiltered, Size),
+    fill_aux(StartXNumber, StartYNumber, Size, Size, Matrix).
+
+
+complete_aux(Row, 1) :-
+    nth1(1, Row, Elem),
+    Elem \== 1,
+    Elem = 0.
+complete_aux(Row, 1).
+complete_aux(Row, LinesLength) :-
+    nth1(LinesLength, Row, Elem),
+    Elem \== 1,
+    Elem = 0,
+    NewRowSize is LinesLength - 1,
+    complete_aux(Row, NewRowSize).
+complete_aux(Row, LinesLength) :-
+    nth1(LinesLength, Row, Elem),
+    Elem == 1,
+    NewRowSize is LinesLength - 1,
+    complete_aux(Row, NewRowSize).
+
+complete_matrix(Matrix, 1, LinesLength) :-
+    nth1(1, Matrix, Row), 
+    complete_aux(Row, LinesLength).
+complete_matrix(Matrix, LinesLength, ConstRowSize) :-
+    NewRowSize is LinesLength - 1, 
+    complete_matrix(Matrix, NewRowSize, ConstRowSize),
+    nth1(LinesLength, Matrix, Row), 
+    complete_aux(Row, ConstRowSize).
+
+convert(StartX, StartY, Lengths, LinesLength, Matrix) :-
+    filter_lists(StartX, StartY, Lengths, StartXFiltered, StartYFiltered, LengthsFiltered),
+    build_matrix(LinesLength, 1, Matrix),
+    length(StartXFiltered, AuxSize),
+    fill_matrix(StartXFiltered, StartYFiltered, LengthsFiltered, AuxSize, Matrix, FilledMatrix),
+    complete_matrix(Matrix, LinesLength, LinesLength).
+
+% -------------------------------------------------------------------------
+
+
+
+
+createRectangles(_, _, _, _, NewRectangles, NewStartX, NewStartY, NewLengths, 1, FixedSize) :-
     NewRectangles = [rect(Ax, L1, Ay, L1, a)], 
-    NewLines = [Ax], 
-    NewColumns = [Ay], 
+    NewStartX = [Ax], 
+    NewStartY = [Ay], 
     NewLengths = [L1], 
     Ax + L1 #=< (FixedSize+1),
     Ay + L1 #=< (FixedSize+1)
 .
 
-createRectangles(Rectangles, Lines, Columns, Lengths, ResultRectangles, ResultStartX, ResultStartY, ResultLengths, Size, FixedSize) :-
+createRectangles(Rectangles, StartX, StartY, Lengths, ResultRectangles, ResultStartX, ResultStartY, ResultLengths, Size, FixedSize) :-
+    %write(Size), nl,
     NewSize is Size - 1,
-    createRectangles(Rectangles, Lines, Columns, Lengths, NewRectangles, NewLines, NewColumns, NewLengths, NewSize, FixedSize),
+    createRectangles(Rectangles, StartX, StartY, Lengths, NewRectangles, NewStartX, NewStartY, NewLengths, NewSize, FixedSize),
     append(NewRectangles, [rect(Ax, L1, Ay, L1, a)], ResultRectangles),
-    append(NewLines, [Ax], ResultStartX),
-    append(NewColumns, [Ay], ResultStartY),
+    append(NewStartX, [Ax], ResultStartX),
+    append(NewStartY, [Ay], ResultStartY),
     append(NewLengths, [L1], ResultLengths),
     Ax + L1 #=< (FixedSize+1),
     Ay + L1 #=< (FixedSize+1).
 
 
 size(LinesLength, Size) :-
-    Reminder is LinesLength mod 2,
-    Reminder == 0,
-    Size is (LinesLength // 2) * (LinesLength // 2)
-.
-
+    Flag is LinesLength mod 2,
+    Flag == 0,
+    Size is (LinesLength // 2) * (LinesLength // 2).
 size(LinesLength, Size) :-
-    Size is ((LinesLength + 1)//2) * ((LinesLength + 1)//2)
-.
+    Flag is LinesLength mod 2,
+    Flag == 1,
+    Size is ((LinesLength + 1)//2) * ((LinesLength + 1)//2).
 
+
+%lines(Coordenates, Lengths, N)
 lines(_, _, _, []).
 lines(Coordenates, Lengths, LineNo, [LineTotal|RestTotals]):-
     check_line(Coordenates, Lengths, LineNo, Counter),
     LineNo2 is LineNo + 1,
     Counter #= LineTotal,
-    lines(Coordenates, Lengths, LineNo2, RestTotals)
-.
+    lines(Coordenates, Lengths, LineNo2, RestTotals).
 
 check_line([], [], _, 0).
 check_line([X|RestX], [L|RestL], LineNo, Counter):-
     LineNo #>= X #/\  LineNo #< (X + L) #<=> B,
     Counter #= Counter2 + (B*L),
-    check_line(RestX,RestL, LineNo, Counter2)
-.
+    check_line(RestX,RestL, LineNo, Counter2).
