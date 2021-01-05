@@ -1,6 +1,5 @@
 :-use_module(library(clpfd)).
 :- use_module(library(lists)).
-:- consult('puzzles.pl').
 
 %at(+Mat, +-Row, +-Col, -+Val)
 at(Row, Col, Mat, Val) :- nth0(Row, Mat, ARow), nth0(Col, ARow, Val).
