@@ -160,7 +160,6 @@ createRectangles(Rectangles, Lines, Columns, Lengths, ResultRectangles, ResultLi
     Y + L #=< (FullSize+1)
 .
 
-
 size(LinesLength, Size) :-
     Reminder is LinesLength mod 2,
     Reminder == 0,
